@@ -3,28 +3,35 @@ import { ref, computed } from "vue";
 import Notification from "./Notification.vue";
 import { useNotifStore } from "@/stores/notifStore";
 import { useRouter } from "vue-router";
+import NotificationContent from "./NotificationContent.vue";
+import BaseDropdown from "./BaseDropdown.vue";
+import AvatarDropdownContent from "./AvatarDropdownContent.vue";
 
 const router = useRouter();
 const notifStore = useNotifStore();
-const showNotifDropDown = ref(false);
+const showNotifDropdown = ref(false);
+const showAvatarDropdown = ref(false);
 
-const toggleNotifications = () => {
-  showNotifDropDown.value = !showNotifDropDown.value;
+const toggleNotifDropdown = () => {
+  showNotifDropdown.value = !showNotifDropdown.value;
+  if (showNotifDropdown.value) {
+    showAvatarDropdown.value = false;
+  }
 };
 
-const markAsRead = (id) => {
-  notifStore.markAsRead(id);
+const toggleAvatarDropdown = () => {
+  showAvatarDropdown.value = !showAvatarDropdown.value;
+  if (showAvatarDropdown.value) {
+    showNotifDropdown.value = false;
+  }
 };
 
-const markAllAsRead = () => {
-  notifStore.markAllAsRead();
-};
 const notifications = computed(() => notifStore.getNotifs);
 const unReadCount = computed(() => notifStore.getUnreadCount);
 const notificationTitle = computed(() => notifStore.getNotificationTitle);
 
 const goToProfile = () => {
-  router.push({ name: "profile", params: { id: 1 } });
+  //router.push({ name: "profile", params: { id: 1 } });
 };
 </script>
 
@@ -42,7 +49,7 @@ const goToProfile = () => {
           src="../assets/bell-closed.svg"
           class="w-10 h-10 rounded-full cursor-pointer"
           alt="Notification"
-          @click="toggleNotifications"
+          @click="toggleNotifDropdown"
           :title="notificationTitle"
         />
         <!-- Badge hiển thị số thông báo chưa đọc -->
@@ -54,53 +61,23 @@ const goToProfile = () => {
         </div>
 
         <!-- Dropdown thông báo -->
-        <div
-          v-if="showNotifDropDown"
-          class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20 text-gray-800"
-        >
-          <div class="p-3 bg-gray-100 flex justify-between items-center">
-            <h3 class="font-medium">Thông báo</h3>
-            <button
-              @click="markAllAsRead"
-              class="text-sm text-blue-600 hover:underline cursor-pointer"
-            >
-              Đánh dấu đã đọc
-            </button>
-          </div>
-
-          <div class="max-h-80 overflow-y-auto scrollbar-custom">
-            <div
-              v-if="notifications.length === 0"
-              class="p-4 text-center text-gray-500"
-            >
-              Không có thông báo
-            </div>
-
-            <div v-for="notification in notifications" :key="notification.id">
-              <Notification
-                :notification="notification"
-                @markAsRead="markAsRead"
-              />
-            </div>
-          </div>
-
-          <div class="p-3 bg-gray-100 text-center">
-            <button
-              class="text-sm text-blue-600 hover:underline cursor-pointer"
-            >
-              Xem tất cả
-            </button>
-          </div>
-        </div>
+        <BaseDropdown v-if="showNotifDropdown">
+          <NotificationContent />
+        </BaseDropdown>
       </div>
 
-      <img
-        src="../assets/avatar.jpg"
-        class="w-12 h-12 rounded-full cursor-pointer"
-        title="Tran Duc Long"
-        alt="Avatar"
-        @click="goToProfile"
-      />
+      <div class="relative">
+        <img
+          src="../assets/avatar.jpg"
+          class="w-12 h-12 rounded-full cursor-pointer"
+          title="Tran Duc Long"
+          alt="Avatar"
+          @click="toggleAvatarDropdown"
+        />
+        <BaseDropdown v-if="showAvatarDropdown">
+          <AvatarDropdownContent />
+        </BaseDropdown>
+      </div>
     </div>
   </header>
 </template>

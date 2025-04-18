@@ -3,12 +3,12 @@ import Friend from "./Friend.vue";
 import { ref, computed } from "vue";
 import avatarImage from "../assets/avatar.jpg";
 import SearchBar from "./SearchBar.vue";
-import {useUserStore} from "@/stores/userStore";
+import { useUserStore } from "@/stores/userStore";
 
 const userStore = useUserStore();
 const searchQuery = ref("");
 
-const friendList = computed(() => userStore.users);
+const friendList = computed(() => userStore.getUsers);
 </script>
 
 <template>

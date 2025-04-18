@@ -12,7 +12,7 @@ export default {
   },
   async getPostById(id) {
     try {
-      const response = await api.get(`/posts/${id}`);
+      const response = await api.get(`/post/${id}`);
       return response.data;
     } catch (error) {
       console.error("ERROR FETCH POST BY ID!!", error);
@@ -21,7 +21,7 @@ export default {
   },
   async updatePost(id, newPostData) {
     try {
-      const response = await api.put(`/posts/${id}`, newPostData);
+      const response = await api.put(`/post/${id}`, newPostData);
       return response.data;
     } catch (error) {
       console.error("ERROR UPDATE POST!!", error);
@@ -30,7 +30,7 @@ export default {
   },
   async deletePost(id) {
     try {
-      const response = await api.delete(`/posts/${id}`);
+      const response = await api.delete(`/post/${id}`);
       return response.data;
     } catch (error) {
       console.error("ERROR DELETE POST!!", error);

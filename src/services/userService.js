@@ -4,7 +4,7 @@ export default {
   async getUsers() {
     try {
       const response = await api.get("/users");
-      return response.data.users;
+      return response.data;
     } catch (error) {
       console.error("ERROR FETCH USERS!!", error);
       throw error;

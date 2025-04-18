@@ -16,26 +16,10 @@ export const useUserStore = defineStore("user", {
           firstName: user.firstName,
           class: user.class || "23T_Nhat1",
           school: user.university || "DUT",
-          avatar: user.avatar || defaultAvatar,
+          avatar: defaultAvatar,
         }));
       } catch (error) {
         console.error("ERROR FETCH USERS", error);
-      }
-    },
-    addUser(user) {
-      this.users.push(user);
-    },
-    updateUser(id, updatedUser) {
-      const userIndex = this.users.findIndex((user) => user.id === id);
-      if (userIndex !== -1) {
-        this.users[userIndex] = updatedUser;
-      }
-    },
-
-    deleteUser(id) {
-      const index = this.users.findIndex((user) => user.id === id);
-      if (index !== -1) {
-        this.users.splice(index, 1);
       }
     },
   },
