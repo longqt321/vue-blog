@@ -1,21 +1,41 @@
 <script setup>
 const props = defineProps({
-  friend: Object,
+  friend: {
+    type: Object,
+    required: true,
+  },
 });
 </script>
 
 <template>
   <div
-    class="friend-item flex items-center p-2 mt-4 bg-blue-200 rounded-4xl cursor-pointer"
+    class="friend-item flex items-center p-3 my-2 rounded-lg transition duration-200"
   >
-    <img
-      class="rounded-full w-12.5 h-12.5 mx-0.5 mr-4"
-      :src="friend.avatar"
-      alt="Avatar"
-      :title="friend.title"
-    />
-    <div class="username text-lg">
-      {{ friend.lastName + " " + friend.firstName }}
+    <div class="relative w-12 h-12 flex-shrink-0 mr-3">
+      <img
+        class="rounded-full w-full h-full object-cover border-2 border-blue-100"
+        :src="friend.avatar"
+        alt="Avatar"
+      />
+      <div
+        class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"
+      ></div>
     </div>
+    <div class="flex-grow">
+      <div class="font-medium text-blue-900">
+        {{ friend.lastName + " " + friend.firstName }}
+      </div>
+      <div class="text-xs text-gray-500 flex items-center">
+        <va-icon name="circle" size="xx-small" class="mr-1 text-green-500" />
+        Online
+      </div>
+    </div>
+    <va-button
+      text
+      color="primary"
+      size="small"
+      icon="message"
+      class="flex-shrink-0"
+    />
   </div>
 </template>

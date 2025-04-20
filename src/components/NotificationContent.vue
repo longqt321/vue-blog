@@ -17,32 +17,43 @@ const notificationTitle = computed(() => notifStore.getNotificationTitle);
 </script>
 
 <template>
-  <div class="p-3 bg-gray-100 flex justify-between items-center">
-    <h3 class="font-medium">Thông báo</h3>
-    <button
-      @click="markAllAsRead"
-      class="text-sm text-blue-600 hover:underline cursor-pointer"
-    >
-      Đánh dấu đã đọc
-    </button>
-  </div>
-
-  <div class="max-h-80 overflow-y-auto scrollbar-custom">
+  <div>
+    <!-- Header -->
     <div
-      v-if="notifications.length === 0"
-      class="p-4 text-center text-gray-500"
+      class="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white flex justify-between items-center"
     >
-      Không có thông báo
+      <h3 class="font-bold text-lg">Notifications</h3>
+      <button
+        @click="markAllAsRead"
+        class="text-sm text-blue-100 hover:text-white transition-colors duration-200 flex items-center"
+      >
+        <va-icon name="done_all" size="small" class="mr-1" />
+        Mark all as read
+      </button>
     </div>
 
-    <div v-for="notification in notifications" :key="notification.id">
-      <Notification :notification="notification" @markAsRead="markAsRead" />
-    </div>
-  </div>
+    <!-- Notification List -->
+    <div class="max-h-[350px] overflow-y-auto scrollbar-custom">
+      <div
+        v-if="notifications.length === 0"
+        class="p-6 text-center text-gray-500"
+      >
+        <va-icon name="notifications_off" size="large" color="#3B82F6" />
+        <p class="mt-2">No notifications</p>
+      </div>
 
-  <div class="p-3 bg-gray-100 text-center">
-    <button class="text-sm text-blue-600 hover:underline cursor-pointer">
-      Xem tất cả
-    </button>
+      <div v-else>
+        <div v-for="notification in notifications" :key="notification.id">
+          <Notification :notification="notification" @markAsRead="markAsRead" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-3 bg-blue-50 text-center border-t border-blue-100">
+      <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+        View all notifications
+      </button>
+    </div>
   </div>
 </template>

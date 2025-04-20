@@ -29,16 +29,11 @@ export const useBlogStore = defineStore("blog", {
         const data = await blogService.getPosts();
         this.posts = data.map((post) => ({
           id: post.id,
-          authorId: (post.userId % 5) + 1,
+          authorId: post.authorId,
           title: post.title,
           content: post.body,
-          hashtags: post.tags || [
-            "khoahoc",
-            "pbl3",
-            "wibu van tue",
-            "mang may tinh",
-          ],
-          createdAt: new Date().toLocaleString(),
+          hashtags: post.tags,
+          createdAt: post.createdAt,
         }));
       } catch (error) {
         console.error("ERROR FECTH POSTS!!", error);

@@ -1,6 +1,117 @@
+<template>
+  <div
+    class="bg-gradient-to-b from-blue-100 to-white min-h-screen w-full flex justify-center items-center py-8"
+  >
+    <div
+      class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-blue-100"
+    >
+      <!-- Form Header with Logo -->
+      <div class="mb-8 text-center">
+        <div class="flex justify-center mb-4">
+          <div
+            class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center"
+          >
+            <va-icon name="article" size="large" color="white" />
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold text-blue-800">Đăng Nhập</h2>
+        <p class="text-gray-500 mt-2">Chào mừng trở lại với Blog App</p>
+      </div>
+
+      <!-- Login Form -->
+      <form @submit.prevent="handleLogin" class="space-y-5">
+        <!-- Username Field -->
+        <div>
+          <label
+            for="username"
+            class="block text-sm font-medium text-blue-800 mb-1"
+          >
+            Tên đăng nhập <span class="text-red-500">*</span>
+          </label>
+          <va-input
+            id="username"
+            v-model="formData.username"
+            placeholder="Nhập tên đăng nhập"
+            class="w-full"
+            color="primary"
+            :error="!!errors.username"
+            :error-messages="errors.username"
+            prepend-inner-icon="person"
+          />
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label
+            for="password"
+            class="block text-sm font-medium text-blue-800 mb-1"
+          >
+            Mật khẩu <span class="text-red-500">*</span>
+          </label>
+          <va-input
+            id="password"
+            v-model="formData.password"
+            type="password"
+            placeholder="Nhập mật khẩu"
+            class="w-full"
+            color="primary"
+            :error="!!errors.password"
+            :error-messages="errors.password"
+            prepend-inner-icon="lock"
+          />
+        </div>
+
+        <!-- Remember me and Forgot password -->
+        <div class="flex justify-between items-center">
+          <a href="#" class="text-sm text-blue-600 hover:underline"
+            >Quên mật khẩu?</a
+          >
+        </div>
+
+        <!-- Error Message Display -->
+        <va-alert
+          v-if="errorMessage"
+          color="danger"
+          icon="error"
+          bordered
+          class="my-4"
+        >
+          {{ errorMessage }}
+        </va-alert>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <va-button
+            type="submit"
+            :loading="isLoading"
+            :disabled="isLoading"
+            class="w-full"
+            size="large"
+            color="primary"
+          >
+            Đăng Nhập
+          </va-button>
+        </div>
+
+        <!-- Register Link -->
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-600">
+            Chưa có tài khoản?
+            <router-link
+              to="/register"
+              class="font-medium text-blue-600 hover:text-blue-800"
+            >
+              Đăng ký ngay
+            </router-link>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref } from "vue";
-import { useUserStore } from "@/stores/userStore";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import authService from "@/services/authService";
@@ -13,7 +124,6 @@ const formData = ref({
   username: "",
   password: "",
 });
-
 // Validation
 const errors = ref({});
 const errorMessage = ref("");
@@ -30,8 +140,6 @@ const validateForm = () => {
     errors.value.password = "Mật khẩu không được để trống";
   }
 
-  // Description is optional, no validation needed
-
   return Object.keys(errors.value).length === 0;
 };
 
@@ -42,125 +150,18 @@ const handleLogin = async () => {
   errorMessage.value = "";
 
   try {
-    isLoading.value = true;
     const response = await authService.login(formData.value);
     authStore.setAuth(response);
+    console.log(authStore.getUser);
     router.push("/");
   } catch (error) {
-    if (error.status === 401) {
-      errorMessage.value = "Wrong username or password";
+    if (error.response && error.response.status === 401) {
+      errorMessage.value = "Sai tên đăng nhập hoặc mật khẩu";
     } else {
-      errorMessage.value = "Có lỗi xảy ra khi đăng nhập";
+      errorMessage.value = "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.";
     }
   } finally {
     isLoading.value = false;
   }
 };
 </script>
-
-<template>
-  <div
-    class="bg-gray-100 min-h-screen w-full flex justify-center items-center py-8"
-  >
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-      <!-- Form Header -->
-      <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-gray-800">Đăng Nhập Tài Khoản</h2>
-      </div>
-
-      <!-- Registration Form -->
-      <form @submit.prevent="handleLogin" class="space-y-4">
-        <!-- Username Field -->
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700">
-            Tên đăng nhập <span class="text-red-500">*</span>
-          </label>
-          <input
-            id="username"
-            v-model="formData.username"
-            type="text"
-            placeholder="Nhập tên đăng nhập"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            :class="{ 'border-red-500': errors.username }"
-          />
-          <p v-if="errors.username" class="mt-1 text-sm text-red-600">
-            {{ errors.username }}
-          </p>
-        </div>
-
-        <!-- Password Field -->
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">
-            Mật khẩu <span class="text-red-500">*</span>
-          </label>
-          <input
-            id="password"
-            v-model="formData.password"
-            type="password"
-            placeholder="Nhập mật khẩu"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            :class="{ 'border-red-500': errors.password }"
-          />
-          <p v-if="errors.password" class="mt-1 text-sm text-red-600">
-            {{ errors.password }}
-          </p>
-        </div>
-
-        <!-- Error Message Display -->
-        <div v-if="errorMessage" class="bg-red-50 p-4">
-          <p class="text-sm text-red-700 text-center break-words">
-            {{ errorMessage }}
-          </p>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="pt-2">
-          <button
-            type="submit"
-            :disabled="isLoading"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            :class="{ 'opacity-70 cursor-not-allowed': isLoading }"
-          >
-            <span v-if="isLoading" class="flex flex-col items-center">
-              <svg
-                class="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Đang xử lý...
-            </span>
-            <span v-else>Đăng Nhập</span>
-          </button>
-        </div>
-
-        <!-- Login Link -->
-        <div class="mt-4 text-center">
-          <p class="text-sm text-gray-600">
-            Chưa có tài khoản?
-            <router-link
-              to="/register"
-              class="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Đăng ký ngay
-            </router-link>
-          </p>
-        </div>
-      </form>
-    </div>
-  </div>
-</template>

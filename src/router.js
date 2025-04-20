@@ -3,6 +3,7 @@ import HomeView from "./views/HomeView.vue";
 import ProfileView from "./views/ProfileView.vue";
 import LoginView from "./views/LoginView.vue";
 import RegisterView from "./views/RegisterView.vue";
+import { useAuthStore } from "@/stores/authStore";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,12 +37,16 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const accessToken = localStorage.getItem("access_token");
+  const authStore = useAuthStore();
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
-  if (requiresAuth && !accessToken) {
+  // Nếu trang yêu cầu xác thực và người dùng chưa đăng nhập và không có chế độ bỏ qua xác thực
+  if (requiresAuth && !authStore.shouldSkipAuth) {
     next("/login");
-  } else if ((to.name === "login" || to.name === "register") && accessToken) {
+  } else if (
+    (to.name === "login" || to.name === "register") &&
+    authStore.isAuthenticated
+  ) {
     next("/");
   } else {
     next();

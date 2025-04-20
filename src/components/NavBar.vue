@@ -1,14 +1,107 @@
+<template>
+  <header
+    class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md sticky top-0 z-50"
+  >
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center py-3">
+        <!-- Left side: Logo and brand name -->
+        <div class="flex items-center space-x-3">
+          <router-link to="/" class="flex items-center space-x-2">
+            <va-icon
+              name="article"
+              size="large"
+              color="#FFFFFF"
+              class="p-1 rounded-md"
+            />
+            <span class="text-xl font-bold">BlogShare</span>
+          </router-link>
+        </div>
+
+        <!-- Middle: Search (only visible on larger screens) -->
+        <div class="hidden md:block flex-1 max-w-md mx-6">
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="Search posts, people, or hashtags..."
+              class="w-full bg-blue-700/30 text-white placeholder-blue-200 border border-blue-400 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+            <button class="hidden"></button>
+          </div>
+        </div>
+
+        <!-- Right side: User controls -->
+        <div class="flex items-center space-x-4">
+          <!-- Notification Bell -->
+          <div class="relative">
+            <button
+              @click="toggleNotifDropdown"
+              class="p-2.5 rounded-full hover:bg-blue-600 transition duration-200"
+              :title="notificationTitle"
+            >
+              <va-icon
+                name="notifications"
+                color="#FFFFFF"
+                size="large"
+                class="font-bold"
+              />
+              <div
+                v-if="notifications.filter((n) => !n.read).length > 0"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+              >
+                {{ notifications.filter((n) => !n.read).length }}
+              </div>
+            </button>
+
+            <!-- Notification Dropdown -->
+            <BaseDropdown v-if="showNotifDropdown">
+              <NotificationContent />
+            </BaseDropdown>
+          </div>
+
+          <!-- User Avatar -->
+          <div class="relative">
+            <button
+              @click="toggleAvatarDropdown"
+              class="flex items-center hover:bg-blue-600 rounded-md space-x-2 focus:outline-none"
+            >
+              <img
+                src="../assets/avatar.jpg"
+                class="w-10 h-10 rounded-full border-2 border-white"
+                alt="User avatar"
+              />
+              <span class="hidden md:block font-medium">Profile</span>
+              <va-icon
+                name="expand_more"
+                color="#FFFFFF"
+                size="medium"
+                class="font-bol p-0.5 rounded"
+              />
+            </button>
+
+            <!-- Avatar Dropdown -->
+            <BaseDropdown v-if="showAvatarDropdown">
+              <AvatarDropdownContent :onClose="toggleAvatarDropdown" />
+            </BaseDropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>
+
 <script setup>
 import { ref, computed } from "vue";
-import Notification from "./Notification.vue";
 import { useNotifStore } from "@/stores/notifStore";
 import { useRouter } from "vue-router";
+import { useBlogStore } from "@/stores/blogStore";
 import NotificationContent from "./NotificationContent.vue";
 import BaseDropdown from "./BaseDropdown.vue";
 import AvatarDropdownContent from "./AvatarDropdownContent.vue";
 
 const router = useRouter();
 const notifStore = useNotifStore();
+const blogStore = useBlogStore();
+
 const showNotifDropdown = ref(false);
 const showAvatarDropdown = ref(false);
 
@@ -26,58 +119,11 @@ const toggleAvatarDropdown = () => {
   }
 };
 
+const openModal = () => {
+  blogStore.openModal();
+};
+
 const notifications = computed(() => notifStore.getNotifs);
 const unReadCount = computed(() => notifStore.getUnreadCount);
 const notificationTitle = computed(() => notifStore.getNotificationTitle);
-
-const goToProfile = () => {
-  //router.push({ name: "profile", params: { id: 1 } });
-};
 </script>
-
-<template>
-  <header
-    class="flex justify-between items-center bg-[#4267b2] text-white p-2 sticky w-full top-0 z-10 border-black"
-  >
-    <div class="home">
-      <h1>Nav bar</h1>
-    </div>
-    <div class="flex items-center space-x-4 pr-4">
-      <div class="relative">
-        <!-- Nút chuông thông báo -->
-        <img
-          src="../assets/bell-closed.svg"
-          class="w-10 h-10 rounded-full cursor-pointer"
-          alt="Notification"
-          @click="toggleNotifDropdown"
-          :title="notificationTitle"
-        />
-        <!-- Badge hiển thị số thông báo chưa đọc -->
-        <div
-          v-if="notifications.filter((n) => !n.read).length > 0"
-          class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
-        >
-          {{ notifications.filter((n) => !n.read).length }}
-        </div>
-
-        <!-- Dropdown thông báo -->
-        <BaseDropdown v-if="showNotifDropdown">
-          <NotificationContent />
-        </BaseDropdown>
-      </div>
-
-      <div class="relative">
-        <img
-          src="../assets/avatar.jpg"
-          class="w-12 h-12 rounded-full cursor-pointer"
-          title="Tran Duc Long"
-          alt="Avatar"
-          @click="toggleAvatarDropdown"
-        />
-        <BaseDropdown v-if="showAvatarDropdown">
-          <AvatarDropdownContent />
-        </BaseDropdown>
-      </div>
-    </div>
-  </header>
-</template>

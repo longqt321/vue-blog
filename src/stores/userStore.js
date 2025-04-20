@@ -14,8 +14,6 @@ export const useUserStore = defineStore("user", {
           id: user.id,
           lastName: user.lastName,
           firstName: user.firstName,
-          class: user.class || "23T_Nhat1",
-          school: user.university || "DUT",
           avatar: defaultAvatar,
         }));
       } catch (error) {
