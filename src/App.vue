@@ -9,11 +9,9 @@ const blogStore = useBlogStore();
 const userStore = useUserStore();
 const authStore = useAuthStore();
 
-// Cấu hình bypass xác thực - Đặt thành true để bỏ qua kiểm tra login
-const BYPASS_AUTH = true;
+const BYPASS_AUTH = false;
 
 onMounted(() => {
-  // Kích hoạt bypass nếu BYPASS_AUTH = true
   if (BYPASS_AUTH) {
     authStore.enableSkipAuth();
   } else {

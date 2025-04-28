@@ -65,32 +65,5 @@ const filteredFriends = computed(() => []);
         />
       </div>
     </div>
-
-    <!-- Suggested Connections Section -->
-    <div class="p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-medium text-blue-800">Suggested Connections</h3>
-        <button class="text-xs text-blue-600 hover:underline">See All</button>
-      </div>
-
-      <div class="space-y-3">
-        <div v-for="i in 3" :key="i" class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div
-              class="w-10 h-10 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center"
-            >
-              <va-icon name="person" />
-            </div>
-            <div class="ml-3">
-              <div class="font-medium text-sm">Suggested User {{ i }}</div>
-              <div class="text-xs text-gray-500">DUT University</div>
-            </div>
-          </div>
-          <va-button size="small" color="primary" icon="add" text
-            >Connect</va-button
-          >
-        </div>
-      </div>
-    </div>
   </div>
 </template>

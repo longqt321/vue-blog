@@ -7,12 +7,12 @@ export const useAuthStore = defineStore("auth", {
     user: JSON.parse(localStorage.getItem("user") || null),
     accessToken: localStorage.getItem("access_token") || null,
     isAuthenticated: !!localStorage.getItem("access_token"),
-    skipAuth: false, // Thêm cờ để bỏ qua xác thực
+    skipAuth: false,
   }),
 
   actions: {
     setAuth(data) {
-      this.accessToken = data.token;
+      this.accessToken = data.accessToken;
       this.user = data.user;
       this.isAuthenticated = true;
       localStorage.setItem("access_token", this.accessToken);
@@ -27,13 +27,11 @@ export const useAuthStore = defineStore("auth", {
       localStorage.removeItem("user");
     },
 
-    // Phương thức để bật chế độ bỏ qua xác thực
     enableSkipAuth() {
       this.skipAuth = true;
       console.log("Authentication check disabled temporarily");
     },
 
-    // Phương thức để tắt chế độ bỏ qua xác thực
     disableSkipAuth() {
       this.skipAuth = false;
       console.log("Authentication check enabled");
@@ -41,7 +39,6 @@ export const useAuthStore = defineStore("auth", {
   },
 
   getters: {
-    // Getter để kiểm tra xem có nên bỏ qua xác thực hay không
     shouldSkipAuth: (state) => state.skipAuth || state.isAuthenticated,
     getUser: (state) => state.user,
   },

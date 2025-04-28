@@ -29,10 +29,10 @@ export const useBlogStore = defineStore("blog", {
         const data = await blogService.getPosts();
         this.posts = data.map((post) => ({
           id: post.id,
-          authorId: post.authorId,
+          author: post.author,
           title: post.title,
           content: post.body,
-          hashtags: post.tags,
+          hashtags: post.hashtags,
           createdAt: post.createdAt,
         }));
       } catch (error) {

@@ -3,8 +3,9 @@ import api from "./api";
 export default {
   async getPosts() {
     try {
-      const response = await api.get("/posts");
-      return response.data.posts;
+      const response = await api.get("/blogs");
+      console.log(response);
+      return response.data;
     } catch (error) {
       console.error("ERROR FETCH POSTS!!", error);
       throw error;
@@ -12,7 +13,7 @@ export default {
   },
   async getPostById(id) {
     try {
-      const response = await api.get(`/post/${id}`);
+      const response = await api.get(`/blogs/${id}`);
       return response.data;
     } catch (error) {
       console.error("ERROR FETCH POST BY ID!!", error);
@@ -21,7 +22,7 @@ export default {
   },
   async updatePost(id, newPostData) {
     try {
-      const response = await api.put(`/post/${id}`, newPostData);
+      const response = await api.put(`/blogs/${id}`, newPostData);
       return response.data;
     } catch (error) {
       console.error("ERROR UPDATE POST!!", error);
@@ -30,7 +31,7 @@ export default {
   },
   async deletePost(id) {
     try {
-      const response = await api.delete(`/post/${id}`);
+      const response = await api.delete(`/blogs/${id}`);
       return response.data;
     } catch (error) {
       console.error("ERROR DELETE POST!!", error);

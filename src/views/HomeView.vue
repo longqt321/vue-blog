@@ -41,6 +41,8 @@ const blogStore = useBlogStore();
 onMounted(() => {
   if (authStore.isAuthenticated) {
     console.log("Authenticated successfully!!");
+    console.log(authStore.accessToken);
+    blogStore.fetchPosts();
   }
 });
 </script>

@@ -17,18 +17,6 @@
           </router-link>
         </div>
 
-        <!-- Middle: Search (only visible on larger screens) -->
-        <div class="hidden md:block flex-1 max-w-md mx-6">
-          <div class="relative">
-            <input
-              type="text"
-              placeholder="Search posts, people, or hashtags..."
-              class="w-full bg-blue-700/30 text-white placeholder-blue-200 border border-blue-400 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <button class="hidden"></button>
-          </div>
-        </div>
-
         <!-- Right side: User controls -->
         <div class="flex items-center space-x-4">
           <!-- Notification Bell -->

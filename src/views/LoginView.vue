@@ -151,8 +151,8 @@ const handleLogin = async () => {
 
   try {
     const response = await authService.login(formData.value);
+    console.log(response);
     authStore.setAuth(response);
-    console.log(authStore.getUser);
     router.push("/");
   } catch (error) {
     if (error.response && error.response.status === 401) {
