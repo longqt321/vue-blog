@@ -4,7 +4,7 @@
 
     <div class="container mx-auto px-4 py-6">
       <div class="flex flex-col md:flex-row gap-6">
-        <!-- Left sidebar - Fixed Profile Info -->
+        <!-- Left sidebar -->
         <div class="md:w-1/3 lg:w-1/4">
           <div
             class="bg-white rounded-xl shadow-sm border border-blue-100 sticky top-20"
@@ -17,20 +17,21 @@
                 class="w-32 h-32 rounded-full border-4 border-blue-100 overflow-hidden bg-white mb-4"
               >
                 <img
-                  :src="user.avatar || '../assets/avatar.jpg'"
+                  :src="profileUser.avatar || '../assets/avatar.jpg'"
                   alt="Profile picture"
                   class="w-full h-full object-cover"
                 />
               </div>
 
               <h1 class="text-xl font-bold text-blue-900 text-center">
-                {{ user.fullName }}
+                {{ profileUser.fullName }}
               </h1>
-              <p class="text-gray-500 text-center">@{{ user.username }}</p>
+              <p class="text-gray-500 text-center">
+                @{{ profileUser.username }}
+              </p>
 
               <!-- Action Buttons -->
               <div class="w-full mt-4 space-y-2">
-                <!-- If viewing own profile -->
                 <va-button
                   v-if="isCurrentUser"
                   color="primary"
@@ -40,22 +41,21 @@
                   Edit Profile
                 </va-button>
 
-                <!-- If viewing someone else's profile -->
                 <template v-else>
                   <va-button
+                    v-if="!isFollowing"
                     color="primary"
                     icon="add"
                     class="w-full"
-                    v-if="!isFollowing"
                     @click="toggleFollow"
                   >
                     Follow
                   </va-button>
                   <va-button
+                    v-else
                     outlined
                     color="primary"
                     class="w-full"
-                    v-else
                     @click="toggleFollow"
                   >
                     Following
@@ -73,7 +73,7 @@
               </div>
             </div>
 
-            <!-- Profile Stats -->
+            <!-- Stats -->
             <div class="py-4 px-6 border-b border-blue-100">
               <div class="flex justify-between text-center">
                 <div>
@@ -91,40 +91,24 @@
               </div>
             </div>
 
-            <!-- Bio and Personal Info -->
+            <!-- Bio -->
             <div class="py-4 px-6">
               <h3 class="font-medium text-gray-700 mb-2">Bio</h3>
               <p class="text-gray-600 text-sm mb-4">
-                {{ user.bio || "No bio provided yet." }}
+                {{ profileUser.bio || "No bio provided yet." }}
               </p>
 
               <div class="space-y-3 text-sm">
                 <div
                   class="flex items-center text-gray-600"
-                  v-if="user.location"
+                  v-if="profileUser.organisation || 1 == 1"
                 >
-                  <va-icon
-                    name="place"
-                    size="small"
-                    class="text-blue-500 mr-2"
-                  />
-                  <span>{{ user.location }}</span>
-                </div>
-                <div class="flex items-center text-gray-600" v-if="user.school">
-                  <va-icon
-                    name="school"
-                    size="small"
-                    class="text-blue-500 mr-2"
-                  />
-                  <span>{{ user.school }}</span>
-                </div>
-                <div class="flex items-center text-gray-600" v-if="user.class">
                   <va-icon
                     name="groups"
                     size="small"
                     class="text-blue-500 mr-2"
                   />
-                  <span>{{ user.class }}</span>
+                  <span>{{ profileUser.organisation }}</span>
                 </div>
                 <div class="flex items-center text-gray-600">
                   <va-icon
@@ -132,16 +116,16 @@
                     size="small"
                     class="text-blue-500 mr-2"
                   />
-                  <span>Joined April 2023</span>
+                  <span></span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Content - Scrollable Blog Posts -->
+        <!-- Right Content -->
         <div class="md:w-2/3 lg:w-3/4">
-          <!-- Tab Navigation -->
+          <!-- Tabs -->
           <div
             class="bg-white rounded-xl shadow-sm overflow-hidden border border-blue-100 mb-6"
           >
@@ -169,7 +153,7 @@
             </div>
 
             <div
-              v-else-if="userPosts.length === 0"
+              v-else-if="hasNoPosts"
               class="bg-white rounded-xl shadow-md p-8 text-center"
             >
               <va-icon name="article_off" size="large" color="#3B82F6" />
@@ -193,47 +177,7 @@
               </va-button>
             </div>
 
-            <!-- Blog Posts with Actions Based on Viewer -->
-            <div v-for="post in userPosts" :key="post.id" class="relative">
-              <!-- Post Actions for Own Profile -->
-              <div
-                v-if="isCurrentUser"
-                class="absolute top-3 right-3 flex space-x-2 z-10"
-              >
-                <va-dropdown :distance="4" position="bottom-end">
-                  <template #anchor>
-                    <va-button
-                      icon="more_horiz"
-                      size="small"
-                      flat
-                      round
-                      color="gray"
-                    />
-                  </template>
-                  <va-dropdown-content class="py-1">
-                    <va-list-item @click="editPost(post.id)">
-                      <va-icon name="edit" class="mr-2" />
-                      Edit
-                    </va-list-item>
-                    <va-list-item @click="toggleVisibility(post.id)">
-                      <va-icon name="visibility_off" class="mr-2" />
-                      {{ post.isPrivate ? "Make Public" : "Make Private" }}
-                    </va-list-item>
-                    <va-list-item
-                      @click="deletePost(post.id)"
-                      class="text-danger"
-                    >
-                      <va-icon name="delete" class="mr-2" />
-                      Delete
-                    </va-list-item>
-                  </va-dropdown-content>
-                </va-dropdown>
-
-                <va-badge color="blue" v-if="post.isPrivate" text="Private" />
-              </div>
-
-              <BlogPost :post="post" />
-            </div>
+            <BlogPost v-for="post in userPosts" :key="post.id" :post="post" />
           </div>
 
           <div v-if="activeTab === 'saved'" class="space-y-6">
@@ -248,82 +192,39 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import { useBlogStore } from "@/stores/blogStore";
 import NavBar from "@/components/NavBar.vue";
 import BlogPost from "@/components/BlogPost.vue";
 import PostCreationModal from "@/components/PostCreationModal.vue";
 
-const route = useRoute();
-const router = useRouter();
 const authStore = useAuthStore();
 const blogStore = useBlogStore();
 
-const isLoading = ref(true);
+const route = useRoute();
 const activeTab = ref("posts");
-const isFollowing = ref(false);
+const isLoading = ref(false);
+const isFollowing = ref(false); // giả lập
 
-// Tabs for the profile
 const tabs = [
   { id: "posts", name: "Posts" },
   { id: "saved", name: "Saved" },
 ];
 
-// Mock user data - in a real app, this would come from an API
-const user = computed(() => {
-  return {
-    id: parseInt(route.params.id) || authStore.user?.id,
-    username: "johndoe",
-    fullName: "John Doe",
-    avatar: "../assets/avatar.jpg",
-    bio: "Software engineer and tech enthusiast. Passionate about building products that make a difference.",
-    location: "Da Nang, Vietnam",
-    school: "Da Nang University of Technology",
-    class: "Computer Science",
-    education: [
-      {
-        school: "Da Nang University of Technology",
-        degree: "Bachelor of Computer Science",
-        years: "2020 - 2024",
-      },
-    ],
-    work: [
-      {
-        company: "Tech Solutions Inc.",
-        position: "Frontend Developer Intern",
-        years: "2023 - Present",
-      },
-    ],
-  };
-});
+const profileUser = computed(() => route.params.id); // hoặc lấy từ route.params.id nếu không phải current user
+const userPosts = computed(() => blogStore.getPosts);
+const savedPosts = computed(() => []); // tùy API
 
-// Check if the current user is viewing their own profile
-const isCurrentUser = ref(true);
-
-// Mock post data
-const userPosts = computed(() => {
-  // If not viewing own profile, filter out private posts
-});
-
-const savedPosts = computed(() => {
-  // In a real app, this would be filtered posts saved by the user
-});
-
-// Function to open the create post modal
-const openCreatePost = () => {};
-
-// Function to edit a post
-const editPost = (postId) => {};
-
-// Function to toggle post visibility (private/public)
-const toggleVisibility = (postId) => {};
-
-// Function to delete a post
-const deletePost = async (postId) => {};
+const isCurrentUser = computed(
+  () => profileUser.value.id === authStore.currentUser?.id
+);
+const hasNoPosts = computed(
+  () => !userPosts.value || userPosts.value.length === 0
+);
 
 const toggleFollow = () => {};
-
 const blockUser = () => {};
+const openCreatePost = () => {};
 </script>

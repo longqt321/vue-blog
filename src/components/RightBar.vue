@@ -9,7 +9,7 @@ const isLoading = ref(false);
 
 const friendList = computed(() => userStore.getUsers);
 
-const filteredFriends = computed(() => []);
+const filteredFriends = computed(() => userStore.getUsers);
 </script>
 
 <template>
@@ -61,6 +61,7 @@ const filteredFriends = computed(() => []);
           v-for="friend in filteredFriends"
           :key="friend.id"
           :friend="friend"
+          @click="console.log(123)"
           class="hover:bg-blue-50 transition duration-200 rounded-lg"
         />
       </div>

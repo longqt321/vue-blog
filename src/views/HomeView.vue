@@ -18,6 +18,7 @@ onMounted(() => {
     console.log("Authenticated successfully!!");
     console.log(authStore.accessToken);
     blogStore.fetchPosts();
+    userStore.fetchUsers();
   }
 });
 </script>

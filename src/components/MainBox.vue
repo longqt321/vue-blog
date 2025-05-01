@@ -8,7 +8,7 @@ import BlogPost from "./BlogPost.vue";
 const blogStore = useBlogStore();
 const searchStore = useBlogSearchStore();
 
-const posts = computed(() => blogStore.searchBlogs(searchStore.getQuery));
+const posts = computed(() => blogStore.getPosts);
 </script>
 <template>
   <div class="space-y-6">

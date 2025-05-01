@@ -72,7 +72,7 @@ const props = defineProps({
 
 const goToProfile = () => {
   if (props.onClose) props.onClose();
-  router.push({ name: "profile", params: { id: 1 } });
+  router.push({ name: "profile", params: { id: authStore.getUser.id } });
 };
 
 const handleLogout = () => {

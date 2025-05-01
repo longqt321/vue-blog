@@ -1,6 +1,9 @@
 import { defineStore } from "pinia";
 import { useUserStore } from "./userStore";
 import blogService from "@/services/blogService";
+import { formatTime } from "@/composables/timeFormatter";
+import { normalizeUser } from "@/composables/userFormater";
+
 export const useBlogStore = defineStore("blog", {
   state: () => ({
     isOpen: false,
@@ -51,72 +54,21 @@ export const useBlogStore = defineStore("blog", {
     // },
   },
   getters: {
-    getPosts: (state) => {
-      const userStore = useUserStore();
+    getPostById(state) {
+      return (id) => {
+        const post = state.posts.find((post) => post.id === id);
+        if (!post) return null;
+        return {
+          ...post,
+          createdAt: formatTime(post.createdAt),
+          author: normalizeUser(post.author),
+        };
+      };
+    },
+    getPosts(state) {
       return state.posts
         .filter((post) => !state.hiddenPosts.includes(post.id))
-        .map((post) => {
-          const author = userStore.getUserById(post.authorId);
-          if (author === undefined) {
-            return {
-              ...post,
-            };
-          }
-          return {
-            ...post,
-            author: {
-              ...author,
-              fullName: userStore.getUserFullName(author),
-            },
-          };
-        });
-    },
-    searchBlogs: (state) => (query) => {
-      if (!query || query.trim() === "") {
-        const blogStore = useBlogStore();
-        return blogStore.getPosts;
-      }
-      const userStore = useUserStore();
-      const lowercaseQuery = query.toLowerCase().trim();
-      return state.posts
-        .filter((post) => !state.hiddenPosts.includes(post.id))
-        .filter((post) => {
-          const author = userStore.getUserById(post.authorId);
-          const authorFullName = author
-            ? userStore.getUserFullName(author)
-            : "";
-          if (lowercaseQuery.startsWith("#")) {
-            console.log(1);
-            const tag = lowercaseQuery.slice(1);
-            return post.hashtags.some((hashtag) =>
-              hashtag.toLowerCase().includes(tag)
-            );
-          } else {
-            return (
-              post.title.toLowerCase().includes(lowercaseQuery) ||
-              authorFullName.toLowerCase().includes(lowercaseQuery)
-            );
-          }
-        })
-        .map((post) => {
-          const author = userStore.getUserById(post.authorId);
-          if (author === undefined) {
-            return {
-              ...post,
-            };
-          } else {
-            return {
-              ...post,
-              author: {
-                ...author,
-                fullName: userStore.getUserFullName(author),
-              },
-            };
-          }
-        });
-    },
-    getPostById: (state) => (id) => {
-      return state.posts.find((post) => post.id === id);
+        .map((post) => this.getPostById(post.id));
     },
 
     isModalOpen: (state) => state.isOpen,

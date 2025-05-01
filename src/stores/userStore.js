@@ -26,9 +26,5 @@ export const useUserStore = defineStore("user", {
     getUserById: (state) => (id) => {
       return state.users.find((user) => user.id === id);
     },
-    getUserFullName: (state) => (user) => {
-      if (!user) return "Unknown";
-      return `${user.lastName} ${user.firstName}`;
-    },
   },
 });
