@@ -18,12 +18,6 @@
           <h3 class="font-semibold text-blue-900">
             {{ post.author?.fullName }}
           </h3>
-          <div class="flex items-center text-sm text-gray-500">
-            <span>{{ post.author?.class }}</span>
-            <span class="mx-1">•</span>
-            <span>{{ post.author?.school }}</span>
-          </div>
-          <div class="text-xs text-gray-400">{{ post.createdAt }}</div>
         </div>
       </div>
 
@@ -50,8 +44,10 @@
 
     <!-- Post Content -->
     <div class="p-5">
-      <h2 class="text-xl font-bold text-blue-900 mb-3">{{ post.title }}</h2>
-      <p class="text-gray-700 mb-4 whitespace-pre-line">{{ post.content }}</p>
+      <h2 class="text-xl text-center font-bold text-blue-900 mb-3">
+        {{ post.title }}
+      </h2>
+      <MdPreview :model-value="post.content" class="prose max-w-none" />
 
       <!-- Tags -->
       <div class="flex flex-wrap gap-2 mt-4">
@@ -67,6 +63,7 @@
         </va-chip>
       </div>
     </div>
+    <div class="text-xs text-gray-400">{{ post.createdAt }}</div>
 
     <!-- Post Actions -->
     <div class="border-t border-blue-50 p-3 bg-blue-50 flex justify-between">
@@ -80,16 +77,14 @@
           <span class="ml-1 text-sm">Comment</span>
         </button>
       </div>
-      <button class="flex items-center text-gray-600 hover:text-blue-600">
-        <va-icon name="share" />
-        <span class="ml-1 text-sm">Share</span>
-      </button>
     </div>
   </article>
 </template>
 
 <script setup>
 import { useBlogStore } from "@/stores/blogStore";
+import { MdPreview } from "md-editor-v3";
+import "md-editor-v3/lib/preview.css";
 
 const props = defineProps({
   post: {
