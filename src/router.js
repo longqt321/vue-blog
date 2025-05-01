@@ -32,6 +32,14 @@ const router = createRouter({
       component: ProfileView,
       props: true,
       meta: { requiresAuth: true },
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore();
+        if (!to.params.id) {
+          next({ name: "profile", params: { id: authStore.getUser.id } });
+        } else {
+          next();
+        }
+      },
     },
   ],
 });

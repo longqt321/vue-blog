@@ -5,10 +5,9 @@ export function formatTime(isoString) {
 
   const hours = pad(date.getHours());
   const minutes = pad(date.getMinutes());
-  const seconds = pad(date.getSeconds());
   const day = pad(date.getDate());
   const month = pad(date.getMonth() + 1);
   const year = date.getFullYear().toString();
 
-  return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+  return `${hours}:${minutes} ${day}/${month}/${year}`;
 }

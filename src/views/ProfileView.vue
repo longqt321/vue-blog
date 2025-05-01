@@ -17,7 +17,7 @@
                 class="w-32 h-32 rounded-full border-4 border-blue-100 overflow-hidden bg-white mb-4"
               >
                 <img
-                  :src="profileUser.avatar || '../assets/avatar.jpg'"
+                  :src="'../assets/avatar.jpg'"
                   alt="Profile picture"
                   class="w-full h-full object-cover"
                 />
@@ -116,7 +116,7 @@
                     size="small"
                     class="text-blue-500 mr-2"
                   />
-                  <span></span>
+                  <span>Tạo lúc: {{ formatTime(profileUser.createdAt) }}</span>
                 </div>
               </div>
             </div>
@@ -145,7 +145,14 @@
               </button>
             </div>
           </div>
-
+          <div class="card bg-white rounded-xl shadow-sm overflow-hidden mb-4">
+            <div class="p-5">
+              <h2 class="text-xl font-bold text-blue-800 mb-4">
+                Create New Post
+              </h2>
+              <CreatePostArea />
+            </div>
+          </div>
           <!-- Tab Content -->
           <div v-if="activeTab === 'posts'" class="space-y-6">
             <div v-if="isLoading" class="flex justify-center py-12">
@@ -192,39 +199,81 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import { useBlogStore } from "@/stores/blogStore";
 import NavBar from "@/components/NavBar.vue";
 import BlogPost from "@/components/BlogPost.vue";
 import PostCreationModal from "@/components/PostCreationModal.vue";
+import blogService from "@/services/blogService";
+import userService from "@/services/userService";
+import { normalizeUser } from "@/composables/userFormater";
+import { formatTime } from "@/composables/timeFormatter";
+import CreatePostArea from "@/components/CreatePostArea.vue";
+
+const fetchProfileUser = async () => {
+  try {
+    console.log(123123);
+    const response = await userService.getUserById(route.params.id);
+    console.log(response);
+    profileUser.value = normalizeUser(response);
+    profileUserId.value = profileUser.value.id;
+    userPosts.value = await blogService.getPostsByUserId(profileUserId.value);
+    console.log(profileUser.value);
+  } catch (error) {
+    console.error("Failed to fetch profile user", error);
+  }
+};
 
 const authStore = useAuthStore();
 const blogStore = useBlogStore();
 
 const route = useRoute();
+const router = useRouter();
 const activeTab = ref("posts");
 const isLoading = ref(false);
 const isFollowing = ref(false); // giả lập
+const userPosts = ref([]);
 
 const tabs = [
   { id: "posts", name: "Posts" },
   { id: "saved", name: "Saved" },
 ];
 
-const profileUser = computed(() => route.params.id); // hoặc lấy từ route.params.id nếu không phải current user
-const userPosts = computed(() => blogStore.getPosts);
-const savedPosts = computed(() => []); // tùy API
+const currentUser = computed(() => authStore.getUser);
+const profileUserId = ref(null);
+const profileUser = ref(null);
 
-const isCurrentUser = computed(
-  () => profileUser.value.id === authStore.currentUser?.id
-);
 const hasNoPosts = computed(
   () => !userPosts.value || userPosts.value.length === 0
 );
 
+const isCurrentUser = computed(() => {
+  return (
+    currentUser.value?.id &&
+    profileUserId.value &&
+    currentUser.value.id === profileUserId.value
+  );
+});
+
 const toggleFollow = () => {};
 const blockUser = () => {};
 const openCreatePost = () => {};
+
+watch(
+  () => route.params.id,
+  async (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      console.log("Route param changed to:", newId);
+      await fetchProfileUser();
+    }
+  },
+  { immediate: true } // Đảm bảo chạy ngay khi component được tạo
+);
+
+onMounted(async () => {
+  console.log("ON MOUNTED");
+  await fetchProfileUser();
+});
 </script>

@@ -7,9 +7,7 @@ const userStore = useUserStore();
 const friendSearch = ref("");
 const isLoading = ref(false);
 
-const friendList = computed(() => userStore.getUsers);
-
-const filteredFriends = computed(() => userStore.getUsers);
+const filteredFriends = ref([]);
 </script>
 
 <template>
@@ -27,7 +25,7 @@ const filteredFriends = computed(() => userStore.getUsers);
         <input
           v-model="friendSearch"
           type="text"
-          placeholder="Search friends..."
+          placeholder="Search users..."
           class="w-full px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <va-icon
@@ -39,7 +37,7 @@ const filteredFriends = computed(() => userStore.getUsers);
 
     <!-- Online Friends Section -->
     <div class="p-4 border-b border-blue-50">
-      <h3 class="font-medium text-blue-800 mb-3">Online Friends</h3>
+      <h3 class="font-medium text-blue-800 mb-3">Popular users</h3>
       <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
         <!-- Loading State -->
         <div v-if="isLoading" class="py-2 text-center">
@@ -52,7 +50,7 @@ const filteredFriends = computed(() => userStore.getUsers);
           class="text-center py-4 text-gray-500"
         >
           <va-icon name="people_alt" size="large" color="#4285F4" />
-          <p class="mt-2">No friends found</p>
+          <p class="mt-2">No users suggested</p>
         </div>
 
         <!-- Friends List -->

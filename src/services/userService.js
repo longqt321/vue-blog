@@ -10,4 +10,14 @@ export default {
       throw error;
     }
   },
+  async getUserById(id) {
+    try {
+      console.log("USER SERVICE");
+      const response = await api.get(`/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR FETCH USER BY ID!!", error);
+      throw error;
+    }
+  },
 };

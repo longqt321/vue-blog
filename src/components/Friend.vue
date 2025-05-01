@@ -1,15 +1,24 @@
 <script setup>
+import { useRouter } from "vue-router";
+
 const props = defineProps({
   friend: {
     type: Object,
     required: true,
   },
 });
+
+const router = useRouter();
+
+const goToProfile = () => {
+  router.push({ name: "profile", params: { id: props.friend.id } });
+};
 </script>
 
 <template>
   <div
-    class="friend-item flex items-center p-3 my-2 rounded-lg transition duration-200"
+    class="friend-item flex items-center p-3 my-2 rounded-lg transition duration-200 cursor-pointer"
+    @click="goToProfile"
   >
     <div class="relative w-12 h-12 flex-shrink-0 mr-3">
       <img

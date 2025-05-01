@@ -16,7 +16,8 @@
         </div>
         <div class="ml-3">
           <h3 class="font-semibold text-blue-900">
-            {{ post.author?.fullName }}
+            {{ post.author?.lastName }} {{ post.author?.firstName }}
+            <span class="text-gray-600">#{{ post.author?.id }}</span>
           </h3>
         </div>
       </div>
@@ -55,7 +56,7 @@
           !expanded && contentTooLong ? 'max-h-[300px]' : 'max-h-full',
         ]"
       >
-        <MdPreview :model-value="post.content" class="prose max-w-none" />
+        <MdPreview :model-value="post.body" class="prose max-w-none" />
       </div>
 
       <!-- Xem thêm / Thu gọn -->
@@ -85,7 +86,9 @@
     </div>
 
     <!-- Thời gian -->
-    <div class="text-xs text-gray-400 px-5 pb-3">{{ post.createdAt }}</div>
+    <div class="text-xs text-gray-400 px-5 pb-3">
+      Đăng lúc: {{ formatTime(post.createdAt) }}
+    </div>
 
     <!-- Actions -->
     <div class="border-t border-blue-50 p-3 bg-blue-50 flex justify-between">
@@ -94,10 +97,10 @@
           <va-icon name="thumb_up" />
           <span class="ml-1 text-sm">Like</span>
         </button>
-        <button class="flex items-center text-gray-600 hover:text-blue-600">
+        <!-- <button class="flex items-center text-gray-600 hover:text-blue-600">
           <va-icon name="comment" />
           <span class="ml-1 text-sm">Comment</span>
-        </button>
+        </button> -->
       </div>
     </div>
   </article>
@@ -108,6 +111,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/preview.css";
+import { formatTime } from "@/composables/timeFormatter";
 
 const props = defineProps({
   post: {

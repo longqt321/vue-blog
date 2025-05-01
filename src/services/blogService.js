@@ -20,6 +20,15 @@ export default {
       throw error;
     }
   },
+  async getPostsByUserId(id) {
+    try {
+      const response = await api.get(`/blogs/user/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR FECTH POSTS BY USER ID", error);
+      throw error;
+    }
+  },
   async updatePost(id, newPostData) {
     try {
       const response = await api.put(`/blogs/${id}`, newPostData);
@@ -35,6 +44,15 @@ export default {
       return response.data;
     } catch (error) {
       console.error("ERROR DELETE POST!!", error);
+      throw error;
+    }
+  },
+  async createPost(post) {
+    try {
+      const response = await api.post(`/blogs`, post);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR CREATE POST!!", error);
       throw error;
     }
   },

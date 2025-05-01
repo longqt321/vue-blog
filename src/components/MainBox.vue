@@ -4,11 +4,25 @@ import CreatePostArea from "./CreatePostArea.vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { useBlogSearchStore } from "@/stores/blogSearchStore";
 import BlogPost from "./BlogPost.vue";
+import blogService from "@/services/blogService";
 
-const blogStore = useBlogStore();
-const searchStore = useBlogSearchStore();
+const posts = ref([]);
+const isLoading = ref(false);
 
-const posts = computed(() => blogStore.getPosts);
+const fetchPosts = async () => {
+  isLoading.value = true;
+  try {
+    posts.value = await blogService.getPosts();
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(async () => {
+  await fetchPosts();
+});
 </script>
 <template>
   <div class="space-y-6">
@@ -21,10 +35,7 @@ const posts = computed(() => blogStore.getPosts);
     </div>
 
     <!-- Loading State -->
-    <div
-      v-if="blogStore.isLoading"
-      class="flex justify-center items-center py-8"
-    >
+    <div v-if="isLoading" class="flex justify-center items-center py-8">
       <va-progress-circle indeterminate color="primary" />
       <span class="ml-3 text-blue-700 font-medium">Loading posts...</span>
     </div>
