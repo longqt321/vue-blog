@@ -13,8 +13,12 @@
         ></div>
       </div>
       <div class="ml-3">
-        <div class="font-bold text-blue-900">Tran Duc Long</div>
-        <div class="text-sm text-gray-500">@dlong2705</div>
+        <div class="font-bold text-blue-900">
+          {{ authStore.getUser.fullName }}
+        </div>
+        <div class="text-sm text-gray-500">
+          @{{ authStore.getUser.username }}
+        </div>
       </div>
     </div>
 

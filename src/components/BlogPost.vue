@@ -17,8 +17,8 @@
         <div class="ml-3">
           <h3 class="font-semibold text-blue-900">
             {{ post.author?.lastName }} {{ post.author?.firstName }}
-            <span class="text-gray-600">#{{ post.author?.id }}</span>
           </h3>
+          <span class="text-gray-600">#{{ post.author?.username }}</span>
         </div>
       </div>
 
@@ -45,9 +45,9 @@
 
     <!-- Nội dung bài viết -->
     <div class="p-5">
-      <h2 class="text-xl text-center font-bold text-blue-900 mb-3">
+      <h1 class="text-xl text-center font-bold text-blue-900 mb-3">
         {{ post.title }}
-      </h2>
+      </h1>
 
       <div
         ref="contentRef"
@@ -93,7 +93,14 @@
     <!-- Actions -->
     <div class="border-t border-blue-50 p-3 bg-blue-50 flex justify-between">
       <div class="flex space-x-4">
-        <button class="flex items-center text-gray-600 hover:text-blue-600">
+        <button
+          @click="handleLikePost"
+          :class="[
+            'flex items-center',
+            post.liked ? 'text-blue-600' : 'text-gray-600',
+            post.liked ? 'hover:text-gray-600' : 'hover:text-blue-600',
+          ]"
+        >
           <va-icon name="thumb_up" />
           <span class="ml-1 text-sm">Like</span>
         </button>
@@ -112,6 +119,7 @@ import { useBlogStore } from "@/stores/blogStore";
 import { MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/preview.css";
 import { formatTime } from "@/composables/timeFormatter";
+import blogService from "@/services/blogService";
 
 const props = defineProps({
   post: {
@@ -120,8 +128,17 @@ const props = defineProps({
   },
 });
 
-const blogStore = useBlogStore();
-const handleHide = () => blogStore.hidePost(props.post.id);
+const handleHide = () => console.log(`Hide post with id ${props.post.id}`);
+const handleLikePost = async () => {
+  const post = props.post;
+  if (post.liked) {
+    const response = await blogService.unlikePost(post.id);
+    post.liked = false;
+  } else {
+    await blogService.likePost(post.id);
+    post.liked = true;
+  }
+};
 
 const contentRef = ref(null);
 const contentTooLong = ref(false);

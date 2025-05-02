@@ -36,6 +36,16 @@ const removeHashtag = (index) => {
 const upBlog = async () => {
   const content = textContent.value;
   isLoading.value = true;
+  const isValidPost = (post) => {
+    if (post.title == null || post.author == null || post.status == null) {
+      return false;
+    }
+    if (post.title == "" || post.status == "") {
+      return false;
+    }
+    return true;
+  };
+
   try {
     const newPost = {
       title: title.value,
@@ -46,7 +56,8 @@ const upBlog = async () => {
     };
     console.log(hashtags.value);
     console.log(newPost);
-    await blogService.createPost(newPost);
+    if (isValidPost(newPost)) await blogService.createPost(newPost);
+    blogStore.closeModal();
   } catch (error) {
     console.error("ERROR UPLOAD NEW BLOG", error);
   }

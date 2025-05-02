@@ -56,4 +56,22 @@ export default {
       throw error;
     }
   },
+  async likePost(postId) {
+    try {
+      const response = await api.post(`/blogs/like/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR LIKE POST!!", error);
+      throw error;
+    }
+  },
+  async unlikePost(postId) {
+    try {
+      const response = await api.post(`/blogs/unlikey/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR UNLIKE POST!!", error);
+      throw error;
+    }
+  },
 };
