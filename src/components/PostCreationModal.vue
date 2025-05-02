@@ -46,21 +46,17 @@ const upBlog = async () => {
     return true;
   };
 
-  try {
-    const newPost = {
-      title: title.value,
-      body: textContent.value,
-      author: authStore.getUser,
-      hashtags: hashtags.value,
-      status: selectedVisibility.value,
-    };
-    console.log(hashtags.value);
-    console.log(newPost);
-    if (isValidPost(newPost)) await blogService.createPost(newPost);
-    blogStore.closeModal();
-  } catch (error) {
-    console.error("ERROR UPLOAD NEW BLOG", error);
-  }
+  const newPost = {
+    title: title.value,
+    body: textContent.value,
+    author: authStore.getUser,
+    hashtags: hashtags.value,
+    status: selectedVisibility.value,
+  };
+  console.log(hashtags.value);
+  console.log(newPost);
+  if (isValidPost(newPost)) await blogService.createPost(newPost);
+  blogStore.closeModal();
   isLoading.value = false;
 };
 

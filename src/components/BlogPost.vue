@@ -23,14 +23,32 @@
       </div>
 
       <div class="flex space-x-1">
-        <va-button
-          icon="more_horiz"
-          round
-          size="small"
-          color="#f0f4f9"
-          text-color="#4B5563"
-          class="hover:bg-blue-50"
-        />
+        <div class="relative">
+          <va-button
+            @click="toggleOptionsDropdown"
+            icon="more_horiz"
+            round
+            size="small"
+            color="#f0f4f9"
+            text-color="#4B5563"
+            class="hover:bg-blue-50"
+          />
+          <!-- Post Options Dropdown -->
+          <BaseDropdown v-if="showOptionsDropdown" class="w-64 right-0">
+            <PostOptionsDropdown
+              :post="post"
+              :is-owner="isPostOwner"
+              :is-pinned="isPinned"
+              :is-saved="isSaved"
+              @edit-post="handleEditPost"
+              @pin-post="handlePinPost"
+              @hide-post="handleHidePost"
+              @save-post="handleSavePost"
+              @hide-user="handleHideUser"
+              @report="handleReport"
+            />
+          </BaseDropdown>
+        </div>
         <va-button
           icon="close"
           round
@@ -114,12 +132,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import { useBlogStore } from "@/stores/blogStore";
+import { useAuthStore } from "@/stores/authStore";
 import { MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/preview.css";
 import { formatTime } from "@/composables/timeFormatter";
 import blogService from "@/services/blogService";
+import BaseDropdown from "./BaseDropdown.vue";
+import PostOptionsDropdown from "./PostOptionsDropdown.vue";
 
 const props = defineProps({
   post: {
@@ -128,7 +149,28 @@ const props = defineProps({
   },
 });
 
+const authStore = useAuthStore();
+const blogStore = useBlogStore();
+
+// UI state
+const contentRef = ref(null);
+const contentTooLong = ref(false);
+const expanded = ref(false);
+const showOptionsDropdown = ref(false);
+
+// Post state
+const isPinned = ref(props.post.isPinned || false);
+const isSaved = ref(props.post.isSaved || false);
+
+// Check if current user is the owner of the post
+const isPostOwner = computed(() => {
+  if (!authStore.isAuthenticated || !props.post.author) return false;
+  return authStore.getUser.id === props.post.author.id;
+});
+
+// Handlers for post options
 const handleHide = () => console.log(`Hide post with id ${props.post.id}`);
+
 const handleLikePost = async () => {
   const post = props.post;
   if (post.liked) {
@@ -140,9 +182,48 @@ const handleLikePost = async () => {
   }
 };
 
-const contentRef = ref(null);
-const contentTooLong = ref(false);
-const expanded = ref(false);
+const toggleOptionsDropdown = () => {
+  showOptionsDropdown.value = !showOptionsDropdown.value;
+};
+
+// Options dropdown handlers
+const handleEditPost = (postId) => {
+  console.log(`Edit post with id ${postId}`);
+  showOptionsDropdown.value = false;
+  // Additional edit logic would go here
+};
+
+const handlePinPost = (postId) => {
+  console.log(`${isPinned.value ? "Unpin" : "Pin"} post with id ${postId}`);
+  isPinned.value = !isPinned.value;
+  showOptionsDropdown.value = false;
+  // API call would go here
+};
+
+const handleHidePost = (postId) => {
+  console.log(`Hide post with id ${postId}`);
+  showOptionsDropdown.value = false;
+  // Additional hide logic would go here
+};
+
+const handleSavePost = (postId) => {
+  console.log(`${isSaved.value ? "Unsave" : "Save"} post with id ${postId}`);
+  isSaved.value = !isSaved.value;
+  showOptionsDropdown.value = false;
+  // API call would go here
+};
+
+const handleHideUser = (userId) => {
+  console.log(`Hide user with id ${userId}`);
+  showOptionsDropdown.value = false;
+  // Additional hide user logic would go here
+};
+
+const handleReport = (postId) => {
+  console.log(`Report post with id ${postId}`);
+  showOptionsDropdown.value = false;
+  // Additional report logic would go here
+};
 
 onMounted(async () => {
   await nextTick();
