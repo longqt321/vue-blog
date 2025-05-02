@@ -23,12 +23,12 @@
       </div>
 
       <div class="flex space-x-1">
-        <div class="relative">
+        <div class="relative" ref="dropdownRef">
           <va-button
             @click="toggleOptionsDropdown"
             icon="more_horiz"
             round
-            size="small"
+            size="medium"
             color="#f0f4f9"
             text-color="#4B5563"
             class="hover:bg-blue-50"
@@ -49,15 +49,6 @@
             />
           </BaseDropdown>
         </div>
-        <va-button
-          icon="close"
-          round
-          size="small"
-          color="#f0f4f9"
-          text-color="#4B5563"
-          class="hover:bg-blue-50"
-          @click="handleHide"
-        />
       </div>
     </div>
 
@@ -132,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { useAuthStore } from "@/stores/authStore";
 import { MdPreview } from "md-editor-v3";
@@ -157,6 +148,7 @@ const contentRef = ref(null);
 const contentTooLong = ref(false);
 const expanded = ref(false);
 const showOptionsDropdown = ref(false);
+const dropdownRef = ref(null); // Reference to track the dropdown element
 
 // Post state
 const isPinned = ref(props.post.isPinned || false);
@@ -186,11 +178,23 @@ const toggleOptionsDropdown = () => {
   showOptionsDropdown.value = !showOptionsDropdown.value;
 };
 
+// Click outside detection handler
+const handleClickOutside = (event) => {
+  if (
+    dropdownRef.value &&
+    !dropdownRef.value.contains(event.target) &&
+    showOptionsDropdown.value
+  ) {
+    showOptionsDropdown.value = false;
+  }
+};
+
 // Options dropdown handlers
 const handleEditPost = (postId) => {
   console.log(`Edit post with id ${postId}`);
   showOptionsDropdown.value = false;
-  // Additional edit logic would go here
+  // Pass the current post to the blog store for editing
+  blogStore.openEditModal(props.post);
 };
 
 const handlePinPost = (postId) => {
@@ -230,5 +234,13 @@ onMounted(async () => {
   if (contentRef.value && contentRef.value.scrollHeight > 320) {
     contentTooLong.value = true;
   }
+
+  // Add global click event listener to detect clicks outside the dropdown
+  document.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  // Clean up the event listener when component is unmounted
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>

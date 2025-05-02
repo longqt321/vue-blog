@@ -16,6 +16,23 @@ const isLoading = ref(false);
 const selectedVisibility = ref("PUBLIC");
 const hashtagInput = ref("");
 const hashtags = ref([]);
+const isEditMode = computed(() => blogStore.isInEditMode);
+const editingPostId = ref(null);
+
+// Populate form with post data when in edit mode
+watch(
+  () => blogStore.getPostBeingEdited,
+  (post) => {
+    if (post) {
+      title.value = post.title || "";
+      textContent.value = post.body || "";
+      selectedVisibility.value = post.status || "PUBLIC";
+      hashtags.value = [...(post.hashtags || [])];
+      editingPostId.value = post.id;
+    }
+  },
+  { immediate: true }
+);
 
 const closeModal = () => {
   blogStore.closeModal();
@@ -33,31 +50,48 @@ const removeHashtag = (index) => {
   hashtags.value.splice(index, 1);
 };
 
-const upBlog = async () => {
-  const content = textContent.value;
-  isLoading.value = true;
-  const isValidPost = (post) => {
-    if (post.title == null || post.author == null || post.status == null) {
-      return false;
-    }
-    if (post.title == "" || post.status == "") {
-      return false;
-    }
-    return true;
-  };
+const isValidPost = (post) => {
+  if (post.title == null || post.author == null || post.status == null) {
+    return false;
+  }
+  if (post.title == "" || post.status == "") {
+    return false;
+  }
+  return true;
+};
 
-  const newPost = {
+const submitPost = async () => {
+  isLoading.value = true;
+
+  const postData = {
     title: title.value,
     body: textContent.value,
     author: authStore.getUser,
     hashtags: hashtags.value,
     status: selectedVisibility.value,
   };
-  console.log(hashtags.value);
-  console.log(newPost);
-  if (isValidPost(newPost)) await blogService.createPost(newPost);
-  blogStore.closeModal();
-  isLoading.value = false;
+
+  try {
+    // console.log(postData);
+    if (isEditMode.value && editingPostId.value) {
+      // Update existing post
+      console.log("Updating post", editingPostId.value, postData);
+      if (isValidPost(postData)) {
+        await blogStore.updatePost(editingPostId.value, postData);
+      }
+    } else {
+      // Create new post
+      console.log("Creating new post", postData);
+      if (isValidPost(postData)) {
+        await blogService.createPost(postData);
+      }
+    }
+    blogStore.closeModal();
+  } catch (error) {
+    console.error("ERROR PROCESSING POST", error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // Reset form when modal is closed
@@ -65,6 +99,9 @@ watch(isOpen, (newVal) => {
   if (!newVal) {
     title.value = "";
     textContent.value = "";
+    selectedVisibility.value = "PUBLIC";
+    hashtags.value = [];
+    editingPostId.value = null;
   }
 });
 </script>
@@ -87,7 +124,7 @@ watch(isOpen, (newVal) => {
         <!-- Header -->
         <div class="mb-6 flex flex-col items-center">
           <h3 class="text-3xl font-bold text-blue-800 text-center mb-4">
-            Create New Post
+            {{ isEditMode ? "Edit Post" : "Create New Post" }}
           </h3>
           <div class="w-full max-w-2xl">
             <input
@@ -169,13 +206,19 @@ watch(isOpen, (newVal) => {
         </div>
         <!-- Footer -->
         <div
-          class="mt-6 border-t border-blue-100 flex justify-between items-center"
+          class="mt-6 border-t border-blue-100 flex justify-between items-center pt-4"
         >
-          <va-button outlined color="primary" class="px-4">
-            Save Draft
+          <va-button outlined color="primary" class="px-4" @click="closeModal">
+            Cancel
           </va-button>
-          <va-button @click="upBlog" outlined color="primary" class="px-4">
-            Post
+          <va-button
+            @click="submitPost"
+            outlined
+            color="primary"
+            class="px-4"
+            :loading="isLoading"
+          >
+            {{ isEditMode ? "Update" : "Post" }}
           </va-button>
         </div>
       </div>

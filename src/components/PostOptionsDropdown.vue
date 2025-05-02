@@ -45,10 +45,17 @@
           <va-icon name="person_off" color="#3B82F6" class="mr-3" />
           <span>Ẩn người dùng này</span>
         </button>
+        <button
+          @click="handleReport"
+          class="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center text-red-600 transition-colors duration-200"
+        >
+          <va-icon name="flag" color="#EF4444" class="mr-3" />
+          <span>Báo cáo bài viết</span>
+        </button>
       </template>
 
       <!-- Common options for all users -->
-      <div class="border-t border-blue-100 my-1"></div>
+      <!-- <div class="border-t border-blue-100 my-1"></div>
 
       <button
         @click="handleReport"
@@ -56,7 +63,7 @@
       >
         <va-icon name="flag" color="#EF4444" class="mr-3" />
         <span>Báo cáo bài viết</span>
-      </button>
+      </button> -->
     </div>
   </div>
 </template>
