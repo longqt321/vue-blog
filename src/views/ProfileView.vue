@@ -199,56 +199,36 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import { useBlogStore } from "@/stores/blogStore";
 import NavBar from "@/components/NavBar.vue";
 import BlogPost from "@/components/BlogPost.vue";
 import PostCreationModal from "@/components/PostCreationModal.vue";
-import blogService from "@/services/blogService";
 import userService from "@/services/userService";
 import { normalizeUser } from "@/composables/userFormater";
 import { formatTime } from "@/composables/timeFormatter";
 import CreatePostArea from "@/components/CreatePostArea.vue";
 
-const fetchProfileUser = async () => {
-  try {
-    console.log(123123);
-    const response = await userService.getUserById(route.params.id);
-    console.log(response);
-    profileUser.value = normalizeUser(response);
-    profileUserId.value = profileUser.value.id;
-    userPosts.value = await blogService.getPostsByUserId(profileUserId.value);
-    console.log(profileUser.value);
-  } catch (error) {
-    console.error("Failed to fetch profile user", error);
-  }
-};
-
 const authStore = useAuthStore();
 const blogStore = useBlogStore();
-
 const route = useRoute();
 const router = useRouter();
+
+// State
 const activeTab = ref("posts");
-const isLoading = ref(false);
-const isFollowing = ref(false); // giả lập
-const userPosts = ref([]);
-
-const tabs = [
-  { id: "posts", name: "Posts" },
-  { id: "saved", name: "Saved" },
-];
-
-const currentUser = computed(() => authStore.getUser);
-const profileUserId = ref(null);
+const isFollowing = ref(false); // To be implemented with real data
 const profileUser = ref(null);
+const savedPosts = ref([]); // To be implemented with real saved posts
 
-const hasNoPosts = computed(
-  () => !userPosts.value || userPosts.value.length === 0
-);
-
+// Computed properties
+const isLoading = computed(() => blogStore.isPostsLoading);
+const error = computed(() => blogStore.getError);
+const userPosts = computed(() => blogStore.getPosts); // Use the single posts array
+const currentUser = computed(() => authStore.getUser);
+const profileUserId = computed(() => profileUser.value?.id);
+const hasNoPosts = computed(() => !blogStore.getPosts.length);
 const isCurrentUser = computed(() => {
   return (
     currentUser.value?.id &&
@@ -257,23 +237,55 @@ const isCurrentUser = computed(() => {
   );
 });
 
-const toggleFollow = () => {};
-const blockUser = () => {};
-const openCreatePost = () => {};
+// Fetch user profile and their posts
+const fetchProfileUser = async () => {
+  try {
+    const response = await userService.getUserById(route.params.id);
+    profileUser.value = normalizeUser(response);
 
+    // Fetch posts for this user using the store
+    if (profileUser.value?.id) {
+      await blogStore.fetchProfilePosts(profileUser.value.id);
+    }
+  } catch (error) {
+    console.error("Failed to fetch profile user", error);
+  }
+};
+
+// Actions
+const toggleFollow = async () => {
+  // To be implemented with real follow/unfollow API
+  isFollowing.value = !isFollowing.value;
+  // API call would go here
+};
+
+const blockUser = async () => {
+  // To be implemented with real block user API
+  // API call would go here
+};
+
+const openCreatePost = () => {
+  blogStore.openModal();
+};
+
+// Watchers and lifecycle hooks
 watch(
   () => route.params.id,
   async (newId, oldId) => {
     if (newId && newId !== oldId) {
-      console.log("Route param changed to:", newId);
       await fetchProfileUser();
     }
   },
-  { immediate: true } // Đảm bảo chạy ngay khi component được tạo
+  { immediate: true }
 );
 
 onMounted(async () => {
-  console.log("ON MOUNTED");
   await fetchProfileUser();
+});
+
+// Clean up when leaving the profile page
+onBeforeUnmount(() => {
+  // No need to explicitly clear posts as they'll be replaced
+  // when navigating to another view
 });
 </script>

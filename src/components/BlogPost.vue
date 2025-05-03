@@ -65,7 +65,11 @@
           !expanded && contentTooLong ? 'max-h-[300px]' : 'max-h-full',
         ]"
       >
-        <MdPreview :model-value="post.body" class="prose max-w-none" />
+        <MdPreview
+          language="en-US"
+          :model-value="post.body"
+          class="prose max-w-none"
+        />
       </div>
 
       <!-- Xem thêm / Thu gọn -->
@@ -107,7 +111,6 @@
           :class="[
             'flex items-center',
             post.liked ? 'text-blue-600' : 'text-gray-600',
-            post.liked ? 'hover:text-gray-600' : 'hover:text-blue-600',
           ]"
         >
           <va-icon name="thumb_up" />
@@ -161,16 +164,21 @@ const isPostOwner = computed(() => {
 });
 
 // Handlers for post options
-const handleHide = () => console.log(`Hide post with id ${props.post.id}`);
+const handleHide = () => {
+  // Would typically call a method in the blogStore to hide this post
+  console.log(`Hide post with id ${props.post.id}`);
+};
 
 const handleLikePost = async () => {
-  const post = props.post;
-  if (post.liked) {
-    const response = await blogService.unlikePost(post.id);
-    post.liked = false;
-  } else {
-    await blogService.likePost(post.id);
-    post.liked = true;
+  try {
+    if (props.post.liked) {
+      await blogStore.unlikePost(props.post.id);
+    } else {
+      await blogStore.likePost(props.post.id);
+    }
+  } catch (error) {
+    console.error("Failed to toggle like status", error);
+    // Could show a toast notification here
   }
 };
 

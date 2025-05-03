@@ -67,7 +67,7 @@ export default {
   },
   async unlikePost(postId) {
     try {
-      const response = await api.post(`/blogs/unlikey/${postId}`);
+      const response = await api.post(`/blogs/unlike/${postId}`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNLIKE POST!!", error);

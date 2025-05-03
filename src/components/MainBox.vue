@@ -1,33 +1,48 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import CreatePostArea from "./CreatePostArea.vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { useBlogSearchStore } from "@/stores/blogSearchStore";
+import { useAuthStore } from "@/stores/authStore";
 import BlogPost from "./BlogPost.vue";
-import blogService from "@/services/blogService";
 
-const posts = ref([]);
-const isLoading = ref(false);
+// Use stores
+const blogStore = useBlogStore();
+const blogSearchStore = useBlogSearchStore();
+const authStore = useAuthStore();
 
-const fetchPosts = async () => {
-  isLoading.value = true;
-  try {
-    posts.value = await blogService.getPosts();
-  } catch (error) {
-    console.error("Failed to fetch posts:", error);
-  } finally {
-    isLoading.value = false;
-  }
-};
+// Get posts from store via computed property for reactivity
+const posts = computed(() => blogStore.getPosts);
+const isLoading = computed(() => blogStore.isPostsLoading);
+const error = computed(() => blogStore.getError);
+const searchActive = computed(() => blogSearchStore.isSearchActive);
+const searchResults = computed(() => blogSearchStore.getResults);
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
+// Fetch posts when component is mounted
 onMounted(async () => {
-  await fetchPosts();
+  if (!posts.value.length || blogStore.isProfileView) {
+    await blogStore.fetchMainPosts();
+  }
 });
+
+// Refresh posts when user logs in or out
+watch(
+  () => authStore.isAuthenticated,
+  async (newValue) => {
+    if (newValue) {
+      await blogStore.fetchMainPosts();
+    }
+  }
+);
 </script>
 <template>
   <div class="space-y-6">
     <!-- Create Post Section -->
-    <div class="card bg-white rounded-xl shadow-sm overflow-hidden">
+    <div
+      class="card bg-white rounded-xl shadow-sm overflow-hidden"
+      v-if="isAuthenticated"
+    >
       <div class="p-5">
         <h2 class="text-xl font-bold text-blue-800 mb-4">Create New Post</h2>
         <CreatePostArea />
@@ -40,16 +55,67 @@ onMounted(async () => {
       <span class="ml-3 text-blue-700 font-medium">Loading posts...</span>
     </div>
 
+    <!-- Error State -->
+    <div
+      v-else-if="error"
+      class="bg-white rounded-xl shadow-sm p-6 text-center"
+    >
+      <va-icon name="error_outline" size="large" color="#EF4444" />
+      <h3 class="mt-4 text-lg font-medium text-gray-800">
+        Something went wrong
+      </h3>
+      <p class="mt-2 text-gray-600">{{ error }}</p>
+      <va-button color="primary" class="mt-4" @click="blogStore.fetchPosts()">
+        Try Again
+      </va-button>
+    </div>
+
+    <!-- Empty State -->
+    <div
+      v-else-if="posts.length === 0"
+      class="bg-white rounded-xl shadow-sm p-8 text-center"
+    >
+      <va-icon name="article_off" size="large" color="#4B5563" />
+      <h3 class="mt-4 text-lg font-medium text-gray-800">No posts yet</h3>
+      <p class="mt-2 text-gray-600">
+        Be the first to share your thoughts with the community!
+      </p>
+      <va-button
+        v-if="isAuthenticated"
+        color="primary"
+        class="mt-4"
+        @click="blogStore.openModal()"
+      >
+        Create Your First Post
+      </va-button>
+    </div>
+
+    <!-- Search-specific Empty State -->
+    <div
+      v-else-if="searchActive && searchResults.length === 0"
+      class="bg-white rounded-xl shadow-sm p-8 text-center"
+    >
+      <va-icon name="search_off" size="large" color="#4B5563" />
+      <h3 class="mt-4 text-lg font-medium text-gray-800">No results found</h3>
+      <p class="mt-2 text-gray-600">
+        We couldn't find any posts matching your search criteria.
+      </p>
+      <va-button
+        color="primary"
+        class="mt-4"
+        @click="blogSearchStore.clearSearch()"
+      >
+        Clear Search
+      </va-button>
+    </div>
+
     <!-- Posts Display -->
     <div v-else class="space-y-5">
-      <div v-if="posts.length === 0" class="card p-8 text-center">
-        <va-icon name="article_off" size="large" color="#4285F4" />
-        <p class="mt-3 text-gray-500">
-          No posts found. Be the first to share something!
-        </p>
-      </div>
-
-      <BlogPost v-for="post in posts" :key="post.id" :post="post" />
+      <BlogPost
+        v-for="post in searchActive ? searchResults : posts"
+        :key="post.id"
+        :post="post"
+      />
     </div>
   </div>
 </template>

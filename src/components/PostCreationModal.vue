@@ -3,21 +3,29 @@ import { ref, computed, watch } from "vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { MdPreview, MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import blogService from "@/services/blogService";
 import { useAuthStore } from "@/stores/authStore";
-import { VaButton } from "vuestic-ui";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const blogStore = useBlogStore();
 const authStore = useAuthStore();
-const isOpen = computed(() => blogStore.isModalOpen);
+
+// Reactive state
 const title = ref("");
 const textContent = ref("");
 const isLoading = ref(false);
 const selectedVisibility = ref("PUBLIC");
 const hashtagInput = ref("");
 const hashtags = ref([]);
-const isEditMode = computed(() => blogStore.isInEditMode);
+const error = ref(null);
 const editingPostId = ref(null);
+
+// Computed properties
+const isOpen = computed(() => blogStore.isModalOpen);
+const isEditMode = computed(() => blogStore.isInEditMode);
+const isFormValid = computed(
+  () => title.value.trim() !== "" && textContent.value.trim() !== ""
+);
 
 // Populate form with post data when in edit mode
 watch(
@@ -34,13 +42,15 @@ watch(
   { immediate: true }
 );
 
+// Methods
 const closeModal = () => {
   blogStore.closeModal();
+  error.value = null;
 };
 
 const addHashtag = () => {
-  const tag = hashtagInput.value.trim().replace(/\s+/g, "-").toLowerCase(); // Thay space bằng gạch ngang
-  if (tag && /^[a-zA-Z0-9-]+$/.test(tag)) {
+  const tag = hashtagInput.value.trim().replace(/\s+/g, "-").toLowerCase();
+  if (tag && /^[a-zA-Z0-9-]+$/.test(tag) && !hashtags.value.includes(tag)) {
     hashtags.value.push(tag);
     hashtagInput.value = "";
   }
@@ -50,17 +60,13 @@ const removeHashtag = (index) => {
   hashtags.value.splice(index, 1);
 };
 
-const isValidPost = (post) => {
-  if (post.title == null || post.author == null || post.status == null) {
-    return false;
-  }
-  if (post.title == "" || post.status == "") {
-    return false;
-  }
-  return true;
-};
-
 const submitPost = async () => {
+  if (!isFormValid.value) {
+    error.value = "Please fill in both title and content fields.";
+    return;
+  }
+
+  error.value = null;
   isLoading.value = true;
 
   const postData = {
@@ -72,23 +78,17 @@ const submitPost = async () => {
   };
 
   try {
-    // console.log(postData);
     if (isEditMode.value && editingPostId.value) {
-      // Update existing post
-      console.log("Updating post", editingPostId.value, postData);
-      if (isValidPost(postData)) {
-        await blogStore.updatePost(editingPostId.value, postData);
-      }
+      // Update existing post using blogStore
+      await blogStore.updatePost(editingPostId.value, postData);
     } else {
-      // Create new post
-      console.log("Creating new post", postData);
-      if (isValidPost(postData)) {
-        await blogService.createPost(postData);
-      }
+      // Create new post using blogStore
+      await blogStore.createPost(postData);
     }
     blogStore.closeModal();
-  } catch (error) {
-    console.error("ERROR PROCESSING POST", error);
+  } catch (err) {
+    console.error("ERROR PROCESSING POST", err);
+    error.value = "There was a problem saving your post. Please try again.";
   } finally {
     isLoading.value = false;
   }
@@ -102,6 +102,7 @@ watch(isOpen, (newVal) => {
     selectedVisibility.value = "PUBLIC";
     hashtags.value = [];
     editingPostId.value = null;
+    error.value = null;
   }
 });
 </script>
@@ -121,6 +122,11 @@ watch(isOpen, (newVal) => {
       <div
         class="inline-block w-full max-w-7xl px-6 pt-6 pb-6 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:p-8"
       >
+        <!-- Error message if there is one -->
+        <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+          {{ error }}
+        </div>
+
         <!-- Header -->
         <div class="mb-6 flex flex-col items-center">
           <h3 class="text-3xl font-bold text-blue-800 text-center mb-4">
@@ -149,45 +155,54 @@ watch(isOpen, (newVal) => {
             ></MdEditor>
           </div>
         </div>
-        <!-- Visibility -->
-        <div class="mt-4 flex items-center gap-6">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              v-model="selectedVisibility"
-              value="PUBLIC"
-              class="text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <span class="text-gray-700">Public</span>
-          </label>
 
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              v-model="selectedVisibility"
-              value="PRIVATE"
-              class="text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <span class="text-gray-700">Private</span>
-          </label>
-          <div class="relative flex-1">
-            <input
-              v-model="hashtagInput"
-              @keyup.enter="addHashtag"
-              type="text"
-              placeholder="Nhập hashtag và ấn Enter..."
-              class="w-[41%] px-3 py-1 text-sm border-b-2 border-blue-200 focus:border-blue-500 outline-none"
-            />
-            <button
-              @click="addHashtag"
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-700"
-            >
-              +
-            </button>
+        <!-- Visibility and Hashtags -->
+        <div class="mt-4 flex flex-wrap items-center gap-4">
+          <!-- Visibility Options -->
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                v-model="selectedVisibility"
+                value="PUBLIC"
+                class="text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <span class="text-gray-700">Public</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                v-model="selectedVisibility"
+                value="PRIVATE"
+                class="text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <span class="text-gray-700">Private</span>
+            </label>
+          </div>
+
+          <!-- Hashtag Input -->
+          <div class="flex-1 min-w-[200px]">
+            <div class="relative">
+              <input
+                v-model="hashtagInput"
+                @keyup.enter="addHashtag"
+                type="text"
+                placeholder="Add a hashtag and press Enter..."
+                class="w-full px-3 py-2 text-sm border-b-2 border-blue-200 focus:border-blue-500 outline-none pr-8"
+              />
+              <button
+                @click="addHashtag"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-700"
+              >
+                <va-icon name="add" />
+              </button>
+            </div>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 items-center w-full">
-          <!-- Hiển thị các tag đã thêm -->
+
+        <!-- Hashtag Display -->
+        <div class="flex flex-wrap gap-2 items-center mt-3">
           <div
             v-for="(tag, index) in hashtags"
             :key="index"
@@ -202,8 +217,14 @@ watch(isOpen, (newVal) => {
             </button>
           </div>
 
-          <!-- Input thêm tag mới -->
+          <div
+            v-if="hashtags.length === 0"
+            class="text-gray-400 text-sm italic"
+          >
+            No hashtags added yet
+          </div>
         </div>
+
         <!-- Footer -->
         <div
           class="mt-6 border-t border-blue-100 flex justify-between items-center pt-4"
@@ -217,6 +238,7 @@ watch(isOpen, (newVal) => {
             color="primary"
             class="px-4"
             :loading="isLoading"
+            :disabled="!isFormValid"
           >
             {{ isEditMode ? "Update" : "Post" }}
           </va-button>
