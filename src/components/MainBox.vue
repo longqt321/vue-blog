@@ -65,7 +65,11 @@ watch(
         Something went wrong
       </h3>
       <p class="mt-2 text-gray-600">{{ error }}</p>
-      <va-button color="primary" class="mt-4" @click="blogStore.fetchPosts()">
+      <va-button
+        color="primary"
+        class="mt-4"
+        @click="blogStore.fetchMainPosts()"
+      >
         Try Again
       </va-button>
     </div>

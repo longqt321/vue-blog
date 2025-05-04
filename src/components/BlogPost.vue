@@ -45,6 +45,7 @@
               @hide-post="handleHidePost"
               @save-post="handleSavePost"
               @hide-user="handleHideUser"
+              @delete-post="handleDeletePost"
               @report="handleReport"
             />
           </BaseDropdown>
@@ -229,6 +230,12 @@ const handleHideUser = (userId) => {
   console.log(`Hide user with id ${userId}`);
   showOptionsDropdown.value = false;
   // Additional hide user logic would go here
+};
+
+const handleDeletePost = async (postId) => {
+  console.log(`Delete post with id ${postId}`);
+  showOptionsDropdown.value = false;
+  await blogStore.deletePost(postId);
 };
 
 const handleReport = (postId) => {

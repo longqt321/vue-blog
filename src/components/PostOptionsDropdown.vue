@@ -18,6 +18,13 @@
           <va-icon name="push_pin" color="#3B82F6" class="mr-3" />
           <span>{{ isPinned ? "Bỏ ghim bài viết" : "Ghim bài viết" }}</span>
         </button>
+        <button
+          @click="handleDeletePost"
+          class="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center text-red-600 transition-colors duration-200"
+        >
+          <va-icon name="flag" color="#EF4444" class="mr-3" />
+          <span>Xóa bài viết</span>
+        </button>
       </template>
 
       <!-- Non-owner options -->
@@ -96,6 +103,7 @@ const emit = defineEmits([
   "hide-post",
   "save-post",
   "hide-user",
+  "delete-post",
   "report",
 ]);
 
@@ -117,6 +125,10 @@ const handleSavePost = () => {
 
 const handleHideUser = () => {
   emit("hide-user", props.post.author.id);
+};
+
+const handleDeletePost = () => {
+  emit("delete-post", props.post.id);
 };
 
 const handleReport = () => {
