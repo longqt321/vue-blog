@@ -1,23 +1,17 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { debounce } from "lodash";
 import SearchBar from "./SearchBar.vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { useBlogSearchStore } from "@/stores/blogSearchStore";
+import hashtagService from "@/services/hashtagService";
 
 const blogStore = useBlogStore();
 const blogSearchStore = useBlogSearchStore();
 const searchQuery = ref(blogSearchStore.getQuery);
-const recommendedBlogs = computed(() => blogStore.getPosts);
 
 // Popular tags that could be derived from actual data in a real app
-const popularTags = ref([
-  "programming",
-  "design",
-  "technology",
-  "education",
-  "travel",
-]);
+const popularTags = ref([]);
 
 const debouncedSearch = debounce((newQuery) => {
   blogSearchStore.setQuery(newQuery);
@@ -31,6 +25,12 @@ const filterByTag = (tag) => {
   searchQuery.value = `#${tag}`;
   blogSearchStore.setQuery(`#${tag}`);
 };
+
+onMounted(async () => {
+  if (!popularTags.value.length) {
+    popularTags.value = await hashtagService.getPopularHashtags();
+  }
+});
 </script>
 
 <template>
