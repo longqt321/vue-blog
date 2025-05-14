@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, provide } from "vue";
+import { onMounted, provide, ref } from "vue";
 import { useUserStore } from "./stores/userStore";
 import { useBlogStore } from "./stores/blogStore";
 import { useAuthStore } from "./stores/authStore";
@@ -36,7 +36,6 @@ provide("vuestic-config", {
 <template>
   <div class="flex flex-col min-h-screen bg-blue-50 text-gray-800 font-sans">
     <router-view class="flex-1"></router-view>
-    <PostCreationModal />
   </div>
 </template>
 

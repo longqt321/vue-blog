@@ -21,6 +21,16 @@ export default {
     }
   },
 
+  async getRelationship(targetId) {
+    try {
+      const response = await api.get(`/users/relationship/${targetId}`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR FETCH RELATIONSHIP!!", error);
+      throw error;
+    }
+  },
+
   // Follow a user
   async followUser(userId) {
     try {

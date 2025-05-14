@@ -230,9 +230,9 @@ import CreatePostArea from "@/components/CreatePostArea.vue";
 
 // User relationship enum
 const UserRelationship = Object.freeze({
-  NONE: "none",
-  FOLLOWING: "following",
-  BLOCKING: "blocking",
+  NONE: "NONE",
+  FOLLOWING: "FOLLOWING",
+  BLOCKING: "BLOCKING",
 });
 
 const authStore = useAuthStore();
@@ -278,6 +278,40 @@ const isCurrentUser = computed(() => {
   );
 });
 
+const toggleRelationship = async (type) => {
+  try {
+    if (!profileUserId.value) return;
+
+    const targetId = profileUserId.value;
+
+    // Nếu đang FOLLOWING mà bấm nữa thì hủy FOLLOW
+    if (type === UserRelationship.FOLLOWING) {
+      if (userRelationship.value === UserRelationship.FOLLOWING) {
+        await userService.unfollowUser(targetId);
+        userRelationship.value = UserRelationship.NONE;
+        profileUser.value.followersCount -= 1;
+      } else {
+        await userService.followUser(targetId);
+        userRelationship.value = UserRelationship.FOLLOWING;
+        profileUser.value.followersCount += 1;
+      }
+    }
+
+    // Nếu đang BLOCKING mà bấm nữa thì Unblock
+    if (type === UserRelationship.BLOCKING) {
+      if (userRelationship.value === UserRelationship.BLOCKING) {
+        await userService.unblockUser(targetId);
+        userRelationship.value = UserRelationship.NONE;
+      } else {
+        await userService.blockUser(targetId);
+        userRelationship.value = UserRelationship.BLOCKING;
+      }
+    }
+  } catch (error) {
+    console.error("toggleRelationship failed:", error);
+  }
+};
+
 // Fetch user profile and their posts
 const fetchProfileUser = async () => {
   try {
@@ -296,6 +330,10 @@ const fetchProfileUser = async () => {
     console.error("Failed to fetch profile user", error);
   }
 };
+const fetchRelationshipStatus = async () => {
+  const response = await userService.getRelationship(route.params.id);
+  userRelationship.value = response.data;
+};
 
 // Handle tab changes
 const handleTabChange = async (tabId) => {
@@ -308,10 +346,6 @@ const handleTabChange = async (tabId) => {
   ) {
     //await userStore.fetchSavedBlogs();
   }
-};
-
-const openCreatePost = () => {
-  //blogStore.openModal();
 };
 
 // Watchers and lifecycle hooks
@@ -330,7 +364,7 @@ watch(activeTab, handleTabChange);
 
 onMounted(async () => {
   await fetchProfileUser();
-  //await fetchRelationshipStatus();
+  await fetchRelationshipStatus();
 });
 
 // Clean up when leaving the profile page

@@ -80,8 +80,10 @@ export const useBlogStore = defineStore("blog", {
     },
 
     async loadMorePublicPosts() {
-      if (!this.hasMorePosts || this.isLoading) return;
-      await this.fetchPublicPosts(this.currentPage + 1, false);
+      console.log("LOAD MORE!!");
+      if (!this.hasMorePosts || this.isLoading) return Promise.resolve();
+
+      return await this.fetchPublicPosts(this.currentPage + 1);
     },
 
     async createPost(postData) {

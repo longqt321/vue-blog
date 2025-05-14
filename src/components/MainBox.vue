@@ -1,10 +1,11 @@
 <script setup>
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, watch, inject } from "vue";
 import CreatePostArea from "./CreatePostArea.vue";
 import BlogPost from "./BlogPost.vue";
 
 import { useBlogStore } from "@/stores/blogStore";
 import { useAuthStore } from "@/stores/authStore";
+import PostCreationModal from "./PostCreationModal.vue";
 
 // Stores
 const blogStore = useBlogStore();
@@ -13,8 +14,13 @@ const authStore = useAuthStore();
 // Reactivity
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const posts = computed(() => blogStore.getPublicPosts);
-const isLoading = computed(() => blogStore.isPostsLoading);
+const isLoading = computed(() => blogStore.isLoading);
 const error = computed(() => blogStore.getError);
+
+const loadMore = () => {
+  console.log("LOAD MORE!!");
+  return blogStore.loadMorePublicPosts();
+};
 
 // On first mount, fetch posts (PUBLIC only)
 onMounted(async () => {
@@ -35,6 +41,7 @@ watch(
 </script>
 
 <template>
+  <PostCreationModal />
   <div class="space-y-6">
     <!-- Create Post Section -->
     <div

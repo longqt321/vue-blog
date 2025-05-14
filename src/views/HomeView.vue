@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref, provide } from "vue";
 import LeftBar from "../components/LeftBar.vue";
 import MainBox from "../components/MainBox.vue";
 import RightBar from "../components/RightBar.vue";
@@ -22,7 +22,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-blue-50 min-h-screen">
+  <div id="ok" ref="scrollContainer" class="bg-blue-50">
     <NavBar />
     <div class="container mx-auto px-4 py-6">
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -42,6 +42,5 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <PostCreationModal />
   </div>
 </template>
