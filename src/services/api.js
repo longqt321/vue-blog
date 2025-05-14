@@ -1,12 +1,18 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
 import router from "@/router";
+import qs from "qs";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/api",
   headers: {
     "Content-Type": "application/json",
   },
+  paramsSerializer: (params) =>
+    qs.stringify(params, {
+      arrayFormat: "repeat", // Chuyển mảng thành nhiều tham số cùng tên
+      encode: false, // Không mã hóa để giữ nguyên giá trị
+    }),
 });
 
 api.interceptors.request.use((config) => {

@@ -1,167 +1,133 @@
+// 📌 Đây là phiên bản đã refactor theo best practice
+// ❌ Các phần bị vi phạm phân tách trách nhiệm (UI logic: isOpen, isEditMode, currentPost)
+//    → Đã được loại bỏ và nên đưa vào composable usePostModal()
+
 import { defineStore } from "pinia";
 import blogService from "@/services/blogService";
 
 export const useBlogStore = defineStore("blog", {
   state: () => ({
-    isOpen: false,
     isLoading: false,
-    posts: [], // Single source of posts for both main feed and profiles
-    currentView: "main", // 'main' or 'profile'
-    currentProfileId: null, // Track which user's profile we're viewing
+    publicPosts: [],
     hiddenPosts: [],
-    isEditMode: false,
-    currentPost: null,
     error: null,
+    currentPage: 0,
+    pageSize: 10,
+    sortBy: "createdAt,desc",
+    hasMorePosts: true,
   }),
+
   actions: {
-    openModal() {
-      this.isOpen = true;
-      this.isEditMode = false;
-      this.currentPost = null;
-    },
-    closeModal() {
-      this.isOpen = false;
-      this.isEditMode = false;
-      this.currentPost = null;
-    },
-    openEditModal(post) {
-      this.currentPost = post;
-      this.isEditMode = true;
-      this.isOpen = true;
-    },
-    // Fetch posts for main feed
-    async fetchMainPosts() {
+    async fetchPublicPosts(page = 0) {
       this.isLoading = true;
       this.error = null;
-      this.currentView = "main";
-      this.currentProfileId = null;
-
       try {
-        const response = await blogService.getPosts();
-        this.posts = response;
-        return response;
+        const response = await blogService.getPosts({
+          visibility: "PUBLIC",
+          page,
+          size: this.pageSize,
+          sortBy: this.sortBy,
+        });
+
+        if (response.success === false) {
+          this.error = response.message || "Unknown error occurred";
+          return;
+        }
+
+        // Trích xuất dữ liệu từ response
+        const pageData = response.data;
+
+        this.publicPosts = pageData.content;
+        this.hasMorePosts = !pageData.last;
+        this.currentPage = page;
       } catch (error) {
-        console.error("ERROR FETCH POSTS", error);
         this.error = "Failed to load posts. Please try again later.";
         throw error;
       } finally {
         this.isLoading = false;
       }
     },
-    // Fetch posts for user profile
-    async fetchProfilePosts(userId) {
-      this.isLoading = true;
-      this.error = null;
-      this.currentView = "profile";
-      this.currentProfileId = userId;
 
-      try {
-        const response = await blogService.getPostsByUserId(userId);
-        this.posts = response;
-        return response;
-      } catch (error) {
-        console.error(`ERROR FETCH USER POSTS for user ${userId}`, error);
-        this.error = "Failed to load user posts. Please try again later.";
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
+    async loadMorePublicPosts() {
+      if (!this.hasMorePosts || this.isLoading) return;
+      await this.fetchPublicPosts(this.currentPage + 1, false);
     },
+
     async createPost(postData) {
       this.error = null;
       try {
         const response = await blogService.createPost(postData);
-
-        // Add the new post to the beginning of the posts array
-        // Only if we're in main view or viewing the author's profile
-        if (
-          this.currentView === "main" ||
-          (this.currentView === "profile" &&
-            this.currentProfileId === postData.author.id)
-        ) {
-          this.posts.unshift(response);
+        if (postData.status === "PUBLIC") {
+          this.publicPosts.unshift(response);
         }
-
         return response;
       } catch (error) {
-        console.error("ERROR CREATE POST", error);
         this.error = "Failed to create post. Please try again.";
         throw error;
       }
     },
+
     async updatePost(postId, updatedPost) {
       this.error = null;
       try {
         const response = await blogService.updatePost(postId, updatedPost);
-
-        // Update post in posts array
-        const postIndex = this.posts.findIndex((post) => post.id === postId);
-        if (postIndex !== -1) {
-          this.posts[postIndex] = response;
+        const index = this.publicPosts.findIndex((p) => p.id === postId);
+        if (updatedPost.status === "PUBLIC") {
+          index !== -1
+            ? (this.publicPosts[index] = response)
+            : this.publicPosts.unshift(response);
+        } else if (index !== -1) {
+          this.publicPosts.splice(index, 1);
         }
-
         return response;
       } catch (error) {
-        console.error("ERROR UPDATE POST", error);
         this.error = "Failed to update post. Please try again.";
         throw error;
       }
     },
+
     async deletePost(postId) {
       this.error = null;
       try {
         await blogService.deletePost(postId);
-
-        // Remove from posts array
-        this.posts = this.posts.filter((post) => post.id !== postId);
+        this.publicPosts = this.publicPosts.filter((p) => p.id !== postId);
       } catch (error) {
-        console.error("ERROR DELETE POST", error);
         this.error = "Failed to delete post. Please try again.";
         throw error;
       }
     },
+
     async likePost(postId) {
       this.error = null;
       try {
         await blogService.likePost(postId);
-
-        // Update liked status in posts array
-        const post = this.posts.find((p) => p.id === postId);
-        if (post) {
-          post.liked = true;
-        }
+        const post = this.publicPosts.find((p) => p.id === postId);
+        if (post) post.liked = true;
       } catch (error) {
-        console.error("ERROR LIKE POST", error);
         this.error = "Failed to like post. Please try again.";
         throw error;
       }
     },
+
     async unlikePost(postId) {
       this.error = null;
       try {
         await blogService.unlikePost(postId);
-
-        // Update liked status in posts array
-        const post = this.posts.find((p) => p.id === postId);
-        if (post) {
-          post.liked = false;
-        }
+        const post = this.publicPosts.find((p) => p.id === postId);
+        if (post) post.liked = false;
       } catch (error) {
-        console.error("ERROR UNLIKE POST", error);
         this.error = "Failed to unlike post. Please try again.";
         throw error;
       }
     },
   },
+
   getters: {
-    isModalOpen: (state) => state.isOpen,
-    isInEditMode: (state) => state.isEditMode,
-    getPostBeingEdited: (state) => state.currentPost,
-    getPosts: (state) => state.posts,
-    getPostById: (state) => (id) => state.posts.find((post) => post.id === id),
+    getPublicPosts: (state) => state.publicPosts,
+    getPostById: (state) => (id) => state.publicPosts.find((p) => p.id === id),
     isPostsLoading: (state) => state.isLoading,
     getError: (state) => state.error,
-    isProfileView: (state) => state.currentView === "profile",
-    getCurrentProfileId: (state) => state.currentProfileId,
+    hasMore: (state) => state.hasMorePosts,
+    getCurrentPage: (state) => state.currentPage,
   },
 });

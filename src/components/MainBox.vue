@@ -1,41 +1,46 @@
 <script setup>
 import { computed, onMounted, watch } from "vue";
 import CreatePostArea from "./CreatePostArea.vue";
+import BlogPost from "./BlogPost.vue";
+
 import { useBlogStore } from "@/stores/blogStore";
 import { useBlogSearchStore } from "@/stores/blogSearchStore";
 import { useAuthStore } from "@/stores/authStore";
-import BlogPost from "./BlogPost.vue";
 
-// Use stores
+// Stores
 const blogStore = useBlogStore();
 const blogSearchStore = useBlogSearchStore();
 const authStore = useAuthStore();
 
-// Get posts from store via computed property for reactivity
-const posts = computed(() => blogStore.getPosts);
+// Reactivity
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const posts = computed(() =>
+  blogSearchStore.getQuery
+    ? blogSearchStore.getResults
+    : blogStore.getPublicPosts
+);
 const isLoading = computed(() => blogStore.isPostsLoading);
 const error = computed(() => blogStore.getError);
-const searchActive = computed(() => blogSearchStore.isSearchActive);
-const searchResults = computed(() => blogSearchStore.getResults);
-const isAuthenticated = computed(() => authStore.isAuthenticated);
+const searchActive = computed(() => blogSearchStore.getQuery !== "");
 
-// Fetch posts when component is mounted
+// On first mount, fetch posts (PUBLIC only)
 onMounted(async () => {
-  if (!posts.value.length || blogStore.isProfileView) {
-    await blogStore.fetchMainPosts();
+  if (!blogStore.getPublicPosts.length) {
+    await blogStore.fetchPublicPosts();
   }
 });
 
-// Refresh posts when user logs in or out
+// Watch login state to refetch PUBLIC posts
 watch(
   () => authStore.isAuthenticated,
   async (newValue) => {
     if (newValue) {
-      await blogStore.fetchMainPosts();
+      await blogStore.fetchPublicPosts();
     }
   }
 );
 </script>
+
 <template>
   <div class="space-y-6">
     <!-- Create Post Section -->
@@ -68,7 +73,7 @@ watch(
       <va-button
         color="primary"
         class="mt-4"
-        @click="blogStore.fetchMainPosts()"
+        @click="blogStore.fetchPublicPosts()"
       >
         Try Again
       </va-button>
@@ -96,7 +101,7 @@ watch(
 
     <!-- Search-specific Empty State -->
     <div
-      v-else-if="searchActive && searchResults.length === 0"
+      v-else-if="searchActive && posts.length === 0"
       class="bg-white rounded-xl shadow-sm p-8 text-center"
     >
       <va-icon name="search_off" size="large" color="#4B5563" />
@@ -107,7 +112,7 @@ watch(
       <va-button
         color="primary"
         class="mt-4"
-        @click="blogSearchStore.clearSearch()"
+        @click="blogSearchStore.setQuery('')"
       >
         Clear Search
       </va-button>
@@ -115,11 +120,7 @@ watch(
 
     <!-- Posts Display -->
     <div v-else class="space-y-5">
-      <BlogPost
-        v-for="post in searchActive ? searchResults : posts"
-        :key="post.id"
-        :post="post"
-      />
+      <BlogPost v-for="post in posts" :key="post.id" :post="post" />
     </div>
   </div>
 </template>

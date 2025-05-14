@@ -42,32 +42,51 @@
                 </va-button>
 
                 <template v-else>
+                  <!-- Follow/Unfollow button -->
                   <va-button
-                    v-if="!isFollowing"
-                    color="primary"
-                    icon="add"
+                    v-if="userRelationship !== UserRelationship.BLOCKING"
+                    :color="
+                      userRelationship === UserRelationship.FOLLOWING
+                        ? 'primary'
+                        : 'primary'
+                    "
+                    :outlined="userRelationship === UserRelationship.FOLLOWING"
+                    :icon="
+                      userRelationship === UserRelationship.FOLLOWING
+                        ? 'person'
+                        : 'person_add'
+                    "
                     class="w-full"
-                    @click="toggleFollow"
+                    @click="toggleRelationship(UserRelationship.FOLLOWING)"
                   >
-                    Follow
+                    {{
+                      userRelationship === UserRelationship.FOLLOWING
+                        ? "Following"
+                        : "Follow"
+                    }}
                   </va-button>
+
+                  <!-- Block/Unblock button -->
                   <va-button
-                    v-else
-                    outlined
-                    color="primary"
-                    class="w-full"
-                    @click="toggleFollow"
-                  >
-                    Following
-                  </va-button>
-                  <va-button
-                    outlined
-                    color="danger"
-                    icon="block"
+                    :color="
+                      userRelationship === UserRelationship.BLOCKING
+                        ? 'primary'
+                        : 'danger'
+                    "
+                    :outlined="userRelationship === UserRelationship.BLOCKING"
+                    :icon="
+                      userRelationship === UserRelationship.BLOCKING
+                        ? 'person_add'
+                        : 'block'
+                    "
                     class="w-full mt-2"
-                    @click="blockUser"
+                    @click="toggleRelationship(UserRelationship.BLOCKING)"
                   >
-                    Block
+                    {{
+                      userRelationship === UserRelationship.BLOCKING
+                        ? "Unblock"
+                        : "Block"
+                    }}
                   </va-button>
                 </template>
               </div>
@@ -77,15 +96,21 @@
             <div class="py-4 px-6 border-b border-blue-100">
               <div class="flex justify-between text-center">
                 <div>
-                  <div class="text-lg font-bold text-blue-800">238</div>
+                  <div class="text-lg font-bold text-blue-800">
+                    {{ profileUser.postCount }}
+                  </div>
                   <div class="text-xs text-gray-500">Posts</div>
                 </div>
                 <div>
-                  <div class="text-lg font-bold text-blue-800">1,432</div>
+                  <div class="text-lg font-bold text-blue-800">
+                    {{ profileUser.followerCount }}
+                  </div>
                   <div class="text-xs text-gray-500">Followers</div>
                 </div>
                 <div>
-                  <div class="text-lg font-bold text-blue-800">847</div>
+                  <div class="text-lg font-bold text-blue-800">
+                    {{ profileUser.followingCount }}
+                  </div>
                   <div class="text-xs text-gray-500">Following</div>
                 </div>
               </div>
@@ -93,30 +118,21 @@
 
             <!-- Bio -->
             <div class="py-4 px-6">
-              <h3 class="font-medium text-gray-700 mb-2">Bio</h3>
+              <h3 class="font-medium text-gray-700 mb-2">Description</h3>
               <p class="text-gray-600 text-sm mb-4">
-                {{ profileUser.bio || "No bio provided yet." }}
+                {{ profileUser.description || "No description provided yet." }}
               </p>
 
               <div class="space-y-3 text-sm">
-                <div
-                  class="flex items-center text-gray-600"
-                  v-if="profileUser.organisation || 1 == 1"
-                >
-                  <va-icon
-                    name="groups"
-                    size="small"
-                    class="text-blue-500 mr-2"
-                  />
-                  <span>{{ profileUser.organisation }}</span>
-                </div>
                 <div class="flex items-center text-gray-600">
                   <va-icon
                     name="date_range"
                     size="small"
                     class="text-blue-500 mr-2"
                   />
-                  <span>Tạo lúc: {{ formatTime(profileUser.createdAt) }}</span>
+                  <span
+                    >Tham gia lúc: {{ formatTime(profileUser.createdAt) }}</span
+                  >
                 </div>
               </div>
             </div>
@@ -145,14 +161,6 @@
               </button>
             </div>
           </div>
-          <div class="card bg-white rounded-xl shadow-sm overflow-hidden mb-4">
-            <div class="p-5">
-              <h2 class="text-xl font-bold text-blue-800 mb-4">
-                Create New Post
-              </h2>
-              <CreatePostArea />
-            </div>
-          </div>
           <!-- Tab Content -->
           <div v-if="activeTab === 'posts'" class="space-y-6">
             <div v-if="isLoading" class="flex justify-center py-12">
@@ -163,7 +171,6 @@
               v-else-if="hasNoPosts"
               class="bg-white rounded-xl shadow-md p-8 text-center"
             >
-              <va-icon name="article_off" size="large" color="#3B82F6" />
               <h3 class="mt-4 text-xl font-medium text-gray-800">
                 No posts yet
               </h3>
@@ -174,27 +181,36 @@
                     : "This user has not shared any posts yet."
                 }}
               </p>
-              <va-button
-                v-if="isCurrentUser"
-                color="primary"
-                class="mt-6"
-                @click="openCreatePost"
-              >
-                Create Your First Post
-              </va-button>
             </div>
 
             <BlogPost v-for="post in userPosts" :key="post.id" :post="post" />
           </div>
 
           <div v-if="activeTab === 'saved'" class="space-y-6">
+            <div v-if="isLoading" class="flex justify-center py-12">
+              <va-progress-circle indeterminate color="primary" />
+            </div>
+
+            <div
+              v-else-if="hasNoPosts"
+              class="bg-white rounded-xl shadow-md p-8 text-center"
+            >
+              <h3 class="mt-4 text-xl font-medium text-gray-800">
+                No posts saved yet
+              </h3>
+              <p class="mt-2 text-gray-500">
+                {{
+                  isCurrentUser
+                    ? "Save posts to read later"
+                    : "This user has not saved any posts yet."
+                }}
+              </p>
+            </div>
             <BlogPost v-for="post in savedPosts" :key="post.id" :post="post" />
           </div>
         </div>
       </div>
     </div>
-
-    <PostCreationModal />
   </div>
 </template>
 
@@ -203,6 +219,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import { useBlogStore } from "@/stores/blogStore";
+import { useUserStore } from "@/stores/userStore";
 import NavBar from "@/components/NavBar.vue";
 import BlogPost from "@/components/BlogPost.vue";
 import PostCreationModal from "@/components/PostCreationModal.vue";
@@ -211,24 +228,48 @@ import { normalizeUser } from "@/composables/userFormater";
 import { formatTime } from "@/composables/timeFormatter";
 import CreatePostArea from "@/components/CreatePostArea.vue";
 
+// User relationship enum
+const UserRelationship = Object.freeze({
+  NONE: "none",
+  FOLLOWING: "following",
+  BLOCKING: "blocking",
+});
+
 const authStore = useAuthStore();
 const blogStore = useBlogStore();
+const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 
 // State
 const activeTab = ref("posts");
-const isFollowing = ref(false); // To be implemented with real data
+const userRelationship = ref(UserRelationship.NONE);
 const profileUser = ref(null);
-const savedPosts = ref([]); // To be implemented with real saved posts
+const tabs = ref([
+  { id: "posts", name: "Posts" },
+  { id: "saved", name: "Saved" },
+]);
 
 // Computed properties
-const isLoading = computed(() => blogStore.isPostsLoading);
-const error = computed(() => blogStore.getError);
-const userPosts = computed(() => blogStore.getPosts); // Use the single posts array
+const isLoading = computed(() =>
+  activeTab.value === "posts"
+    ? userStore.isPersonalBlogsLoading
+    : userStore.isSavedBlogsLoading
+);
+const error = computed(() =>
+  activeTab.value === "posts"
+    ? userStore.getPersonalBlogsError
+    : userStore.getSavedBlogsError
+);
+const userPosts = computed(() => userStore.getPersonalBlogs);
+const savedPosts = computed(() => userStore.getSavedBlogs);
 const currentUser = computed(() => authStore.getUser);
 const profileUserId = computed(() => profileUser.value?.id);
-const hasNoPosts = computed(() => !blogStore.getPosts.length);
+const hasNoPosts = computed(() =>
+  activeTab.value === "posts"
+    ? userPosts.value.length === 0
+    : savedPosts.value.length === 0
+);
 const isCurrentUser = computed(() => {
   return (
     currentUser.value?.id &&
@@ -240,32 +281,37 @@ const isCurrentUser = computed(() => {
 // Fetch user profile and their posts
 const fetchProfileUser = async () => {
   try {
-    const response = await userService.getUserById(route.params.id);
-    profileUser.value = normalizeUser(response);
+    await userStore.fetchProfile(route.params.id);
+    profileUser.value = userStore.getProfile;
+    // Fetch posts for this user using the userStore with username
+    if (profileUser.value?.username) {
+      await userStore.fetchPersonalBlogs();
 
-    // Fetch posts for this user using the store
-    if (profileUser.value?.id) {
-      await blogStore.fetchProfilePosts(profileUser.value.id);
+      // Only fetch saved blogs if viewing own profile
+      if (isCurrentUser.value) {
+        await userStore.fetchSavedBlogs();
+      }
     }
   } catch (error) {
     console.error("Failed to fetch profile user", error);
   }
 };
 
-// Actions
-const toggleFollow = async () => {
-  // To be implemented with real follow/unfollow API
-  isFollowing.value = !isFollowing.value;
-  // API call would go here
-};
+// Handle tab changes
+const handleTabChange = async (tabId) => {
+  activeTab.value = tabId;
 
-const blockUser = async () => {
-  // To be implemented with real block user API
-  // API call would go here
+  if (
+    tabId === "saved" &&
+    isCurrentUser.value &&
+    savedPosts.value.length === 0
+  ) {
+    //await userStore.fetchSavedBlogs();
+  }
 };
 
 const openCreatePost = () => {
-  blogStore.openModal();
+  //blogStore.openModal();
 };
 
 // Watchers and lifecycle hooks
@@ -279,13 +325,16 @@ watch(
   { immediate: true }
 );
 
+// Handle tab changes with watcher
+watch(activeTab, handleTabChange);
+
 onMounted(async () => {
   await fetchProfileUser();
+  //await fetchRelationshipStatus();
 });
 
 // Clean up when leaving the profile page
 onBeforeUnmount(() => {
-  // No need to explicitly clear posts as they'll be replaced
-  // when navigating to another view
+  // No explicit cleanup needed as we're using dedicated stores
 });
 </script>
