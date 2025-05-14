@@ -15,7 +15,6 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
 const posts = computed(() => blogStore.getPublicPosts);
 const isLoading = computed(() => blogStore.isPostsLoading);
 const error = computed(() => blogStore.getError);
-const searchActive = computed(() => blogSearchStore.getQuery !== "");
 
 // On first mount, fetch posts (PUBLIC only)
 onMounted(async () => {
@@ -82,25 +81,6 @@ watch(
       <p class="mt-2 text-gray-600">
         Be the first to share your thoughts with the community!
       </p>
-    </div>
-
-    <!-- Search-specific Empty State -->
-    <div
-      v-else-if="searchActive && posts.length === 0"
-      class="bg-white rounded-xl shadow-sm p-8 text-center"
-    >
-      <va-icon name="search_off" size="large" color="#4B5563" />
-      <h3 class="mt-4 text-lg font-medium text-gray-800">No results found</h3>
-      <p class="mt-2 text-gray-600">
-        We couldn't find any posts matching your search criteria.
-      </p>
-      <va-button
-        color="primary"
-        class="mt-4"
-        @click="blogSearchStore.setQuery('')"
-      >
-        Clear Search
-      </va-button>
     </div>
 
     <!-- Posts Display -->

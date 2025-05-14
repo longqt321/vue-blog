@@ -26,17 +26,13 @@ const goToProfile = () => {
         :src="friend.avatar"
         alt="Avatar"
       />
-      <div
-        class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"
-      ></div>
     </div>
     <div class="flex-grow">
       <div class="font-medium text-blue-900">
         {{ friend.lastName + " " + friend.firstName }}
       </div>
       <div class="text-xs text-gray-500 flex items-center">
-        <va-icon name="circle" size="xx-small" class="mr-1 text-green-500" />
-        Online
+        @{{ friend.username }}
       </div>
     </div>
   </div>

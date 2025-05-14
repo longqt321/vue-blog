@@ -4,6 +4,7 @@
 
 import { defineStore } from "pinia";
 import blogService from "@/services/blogService";
+import { trim } from "lodash";
 
 export const useBlogStore = defineStore("blog", {
   state: () => ({
@@ -15,19 +16,49 @@ export const useBlogStore = defineStore("blog", {
     pageSize: 10,
     sortBy: "createdAt,desc",
     hasMorePosts: true,
+    searchQuery: "",
   }),
 
   actions: {
+    parseSearchQuery() {
+      const filter = {
+        title: "",
+        hashtags: [],
+        username: "",
+        author: "",
+      };
+      if (!this.searchQuery) return filter;
+      const tokens = this.searchQuery.split(",");
+      for (const token of tokens) {
+        const trimmed = token.trim();
+        if (trimmed.startsWith("#")) {
+          filter.hashtags.push(trimmed.substring(1));
+        } else if (trimmed.startsWith("@")) {
+          filter.username = trimmed.substring(1);
+        } else if (trimmed.startsWith("!")) {
+          filter.author = trimmed.substring(1);
+        } else {
+          filter.title = trimmed;
+        }
+      }
+      return filter;
+    },
+
     async fetchPublicPosts(page = 0) {
       this.isLoading = true;
       this.error = null;
       try {
-        const response = await blogService.getPosts({
+        const filter = {
+          ...this.parseSearchQuery(),
           visibility: "PUBLIC",
+        };
+        const response = await blogService.getPosts({
+          ...filter,
           page,
           size: this.pageSize,
           sortBy: this.sortBy,
         });
+        console.log(filter);
 
         if (response.success === false) {
           this.error = response.message || "Unknown error occurred";

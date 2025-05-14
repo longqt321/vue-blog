@@ -5,13 +5,31 @@ import SearchBar from "./SearchBar.vue";
 import { useBlogStore } from "@/stores/blogStore";
 import hashtagService from "@/services/hashtagService";
 
+// Stores
+const blogStore = useBlogStore();
+
 // Popular tags that could be derived from actual data in a real app
 const popularTags = ref([]);
+const searchQuery = ref("");
 
 onMounted(async () => {
   if (!popularTags.value.length) {
     popularTags.value = await hashtagService.getPopularHashtags();
   }
+});
+
+const performSearch = async (query) => {
+  console.log("Searching for:", query);
+  blogStore.searchQuery = searchQuery.value;
+  // gọi API hoặc filter ở đây
+  await blogStore.fetchPublicPosts();
+};
+
+const debouncedSearch = debounce(performSearch, 500);
+
+// Watch query
+watch(searchQuery, (newVal) => {
+  debouncedSearch(newVal);
 });
 </script>
 

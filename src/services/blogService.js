@@ -12,7 +12,6 @@ export default {
       const response = await api.get("/blogs", {
         params,
       });
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error("ERROR FETCH POSTS!!", error);
