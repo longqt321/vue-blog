@@ -2,12 +2,19 @@
 import Friend from "./Friend.vue";
 import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/stores/userStore";
+import userService from "@/services/userService";
 
 const userStore = useUserStore();
-const friendSearch = ref("");
+const userSearch = ref("");
 const isLoading = ref(false);
 
-const filteredFriends = ref([]);
+const suggestedUsers = ref([]);
+
+onMounted(async () => {
+  if (!suggestedUsers.value.length) {
+    suggestedUsers.value = await userService.getUsers();
+  }
+});
 </script>
 
 <template>
@@ -16,14 +23,14 @@ const filteredFriends = ref([]);
   >
     <!-- Header Section -->
     <div class="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-      <h2 class="text-lg font-bold">Your Network</h2>
+      <h2 class="text-lg font-bold">Famous users</h2>
     </div>
 
     <!-- Search Friends Section -->
     <div class="p-4 border-b border-blue-50">
       <div class="relative">
         <input
-          v-model="friendSearch"
+          v-model="userSearch"
           type="text"
           placeholder="Search users..."
           class="w-full px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -46,7 +53,7 @@ const filteredFriends = ref([]);
 
         <!-- No Friends State -->
         <div
-          v-else-if="filteredFriends.length === 0"
+          v-else-if="suggestedUsers.length === 0"
           class="text-center py-4 text-gray-500"
         >
           <va-icon name="people_alt" size="large" color="#4285F4" />
@@ -56,7 +63,7 @@ const filteredFriends = ref([]);
         <!-- Friends List -->
         <Friend
           v-else
-          v-for="friend in filteredFriends"
+          v-for="friend in suggestedUsers"
           :key="friend.id"
           :friend="friend"
           @click="console.log(123)"

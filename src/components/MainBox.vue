@@ -4,21 +4,15 @@ import CreatePostArea from "./CreatePostArea.vue";
 import BlogPost from "./BlogPost.vue";
 
 import { useBlogStore } from "@/stores/blogStore";
-import { useBlogSearchStore } from "@/stores/blogSearchStore";
 import { useAuthStore } from "@/stores/authStore";
 
 // Stores
 const blogStore = useBlogStore();
-const blogSearchStore = useBlogSearchStore();
 const authStore = useAuthStore();
 
 // Reactivity
 const isAuthenticated = computed(() => authStore.isAuthenticated);
-const posts = computed(() =>
-  blogSearchStore.getQuery
-    ? blogSearchStore.getResults
-    : blogStore.getPublicPosts
-);
+const posts = computed(() => blogStore.getPublicPosts);
 const isLoading = computed(() => blogStore.isPostsLoading);
 const error = computed(() => blogStore.getError);
 const searchActive = computed(() => blogSearchStore.getQuery !== "");
@@ -84,19 +78,10 @@ watch(
       v-else-if="posts.length === 0"
       class="bg-white rounded-xl shadow-sm p-8 text-center"
     >
-      <va-icon name="article_off" size="large" color="#4B5563" />
       <h3 class="mt-4 text-lg font-medium text-gray-800">No posts yet</h3>
       <p class="mt-2 text-gray-600">
         Be the first to share your thoughts with the community!
       </p>
-      <va-button
-        v-if="isAuthenticated"
-        color="primary"
-        class="mt-4"
-        @click="blogStore.openModal()"
-      >
-        Create Your First Post
-      </va-button>
     </div>
 
     <!-- Search-specific Empty State -->

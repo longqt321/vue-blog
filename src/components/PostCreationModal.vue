@@ -5,36 +5,37 @@ import { MdPreview, MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { useAuthStore } from "@/stores/authStore";
 import { useRoute } from "vue-router";
+import { useModalStore } from "@/stores/modalStore";
 
-const route = useRoute();
 const blogStore = useBlogStore();
 const authStore = useAuthStore();
+const modalStore = useModalStore();
 
 // Reactive state
 const title = ref("");
 const textContent = ref("");
 const isLoading = ref(false);
-const selectedVisibility = ref("PUBLIC");
+const selectedVisibility = ref("");
 const hashtagInput = ref("");
 const hashtags = ref([]);
 const error = ref(null);
 const editingPostId = ref(null);
 
 // Computed properties
-const isOpen = computed(() => blogStore.isModalOpen);
-const isEditMode = computed(() => blogStore.isInEditMode);
+const isOpen = computed(() => modalStore.isModalOpen);
+const isEditMode = computed(() => modalStore.isInEditMode);
 const isFormValid = computed(
   () => title.value.trim() !== "" && textContent.value.trim() !== ""
 );
 
 // Populate form with post data when in edit mode
 watch(
-  () => blogStore.getPostBeingEdited,
+  () => modalStore.getPostBeingEdited,
   (post) => {
     if (post) {
       title.value = post.title || "";
       textContent.value = post.body || "";
-      selectedVisibility.value = post.status || "PUBLIC";
+      selectedVisibility.value = post.visibility || "PUBLIC";
       hashtags.value = [...(post.hashtags || [])];
       editingPostId.value = post.id;
     }
@@ -44,7 +45,7 @@ watch(
 
 // Methods
 const closeModal = () => {
-  blogStore.closeModal();
+  modalStore.closeModal();
   error.value = null;
 };
 
@@ -74,18 +75,18 @@ const submitPost = async () => {
     body: textContent.value,
     author: authStore.getUser,
     hashtags: hashtags.value,
-    status: selectedVisibility.value,
+    visibility: selectedVisibility.value,
   };
 
   try {
     if (isEditMode.value && editingPostId.value) {
       // Update existing post using blogStore
-      await blogStore.updatePost(editingPostId.value, postData);
+      await modalStore.updatePost(editingPostId.value, postData);
     } else {
       // Create new post using blogStore
-      await blogStore.createPost(postData);
+      await modalStore.createPost(postData);
     }
-    blogStore.closeModal();
+    modalStore.closeModal();
   } catch (err) {
     console.error("ERROR PROCESSING POST", err);
     error.value = "There was a problem saving your post. Please try again.";

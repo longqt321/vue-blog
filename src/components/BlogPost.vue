@@ -23,6 +23,12 @@
       </div>
 
       <div class="flex space-x-1">
+        <span
+          v-if="isPrivate"
+          class="flex items-center justify-center mr-4 text-red-500 font-bold"
+          >{{ post.visibility }}</span
+        >
+
         <div class="relative" ref="dropdownRef">
           <va-button
             @click="toggleOptionsDropdown"
@@ -38,13 +44,11 @@
             <PostOptionsDropdown
               :post="post"
               :is-owner="isPostOwner"
-              :is-pinned="isPinned"
               :is-saved="isSaved"
               @edit-post="handleEditPost"
-              @pin-post="handlePinPost"
               @hide-post="handleHidePost"
               @save-post="handleSavePost"
-              @hide-user="handleHideUser"
+              @block-user="handleBlockUser"
               @delete-post="handleDeletePost"
               @report="handleReport"
             />
@@ -136,6 +140,8 @@ import { formatTime } from "@/composables/timeFormatter";
 import blogService from "@/services/blogService";
 import BaseDropdown from "./BaseDropdown.vue";
 import PostOptionsDropdown from "./PostOptionsDropdown.vue";
+import { useUserStore } from "@/stores/userStore";
+import { useModalStore } from "@/stores/modalStore";
 
 const props = defineProps({
   post: {
@@ -146,6 +152,8 @@ const props = defineProps({
 
 const authStore = useAuthStore();
 const blogStore = useBlogStore();
+const userStore = useUserStore();
+const modalStore = useModalStore();
 
 // UI state
 const contentRef = ref(null);
@@ -155,8 +163,8 @@ const showOptionsDropdown = ref(false);
 const dropdownRef = ref(null); // Reference to track the dropdown element
 
 // Post state
-const isPinned = ref(props.post.isPinned || false);
 const isSaved = ref(props.post.isSaved || false);
+const isPrivate = computed(() => props.post.visibility == "PRIVATE");
 
 // Check if current user is the owner of the post
 const isPostOwner = computed(() => {
@@ -202,15 +210,8 @@ const handleClickOutside = (event) => {
 const handleEditPost = (postId) => {
   console.log(`Edit post with id ${postId}`);
   showOptionsDropdown.value = false;
+  modalStore.openModalForEdit(props.post);
   // Pass the current post to the blog store for editing
-  blogStore.openEditModal(props.post);
-};
-
-const handlePinPost = (postId) => {
-  console.log(`${isPinned.value ? "Unpin" : "Pin"} post with id ${postId}`);
-  isPinned.value = !isPinned.value;
-  showOptionsDropdown.value = false;
-  // API call would go here
 };
 
 const handleHidePost = (postId) => {
@@ -219,14 +220,22 @@ const handleHidePost = (postId) => {
   // Additional hide logic would go here
 };
 
-const handleSavePost = (postId) => {
+const handleSavePost = async (postId) => {
   console.log(`${isSaved.value ? "Unsave" : "Save"} post with id ${postId}`);
   isSaved.value = !isSaved.value;
   showOptionsDropdown.value = false;
-  // API call would go here
+  try {
+    if (isSaved) {
+      await blogService.unsavePost(postId);
+    } else {
+      await blogService.savePost(postId);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-const handleHideUser = (userId) => {
+const handleBlockUser = (userId) => {
   console.log(`Hide user with id ${userId}`);
   showOptionsDropdown.value = false;
   // Additional hide user logic would go here
@@ -235,7 +244,9 @@ const handleHideUser = (userId) => {
 const handleDeletePost = async (postId) => {
   console.log(`Delete post with id ${postId}`);
   showOptionsDropdown.value = false;
-  await blogStore.deletePost(postId);
+  await blogService.deletePost(postId);
+  blogStore.removePostById(postId);
+  userStore.removePostById(postId);
 };
 
 const handleReport = (postId) => {

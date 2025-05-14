@@ -1,10 +1,9 @@
 <script setup>
-import { computed } from "vue";
-import { useBlogStore } from "@/stores/blogStore";
+import { useModalStore } from "@/stores/modalStore";
 
-const blogStore = useBlogStore();
+const modalStore = useModalStore();
 const openModal = () => {
-  blogStore.openModal();
+  modalStore.openModalForCreate();
 };
 </script>
 
@@ -18,4 +17,3 @@ const openModal = () => {
     ></textarea>
   </div>
 </template>
-

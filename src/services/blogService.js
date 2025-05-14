@@ -20,7 +20,6 @@ export default {
     }
   },
 
-
   async updatePost(id, newPostData) {
     try {
       const response = await api.put(`/blogs/${id}`, newPostData);
@@ -53,7 +52,7 @@ export default {
 
   async likePost(postId) {
     try {
-      const response = await api.post(`/blogs/like/${postId}`);
+      const response = await api.post(`/blogs/${postId}/like`);
       return response.data;
     } catch (error) {
       console.error("ERROR LIKE POST!!", error);
@@ -63,7 +62,7 @@ export default {
 
   async unlikePost(postId) {
     try {
-      const response = await api.post(`/blogs/unlike/${postId}`);
+      const response = await api.post(`/blogs/${postId}/unlike`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNLIKE POST!!", error);
@@ -71,27 +70,10 @@ export default {
     }
   },
 
-  // Get saved posts for the logged-in user
-  async getSavedPosts(page = 0, size = 10, sortBy = "createdAt,desc") {
-    try {
-      const response = await api.get("/blogs/saved", {
-        params: {
-          page,
-          size,
-          sortBy,
-        },
-      });
-      return response.data.content;
-    } catch (error) {
-      console.error("ERROR FETCH SAVED POSTS", error);
-      throw error;
-    }
-  },
-
   // Save a post
   async savePost(postId) {
     try {
-      const response = await api.post(`/blogs/save/${postId}`);
+      const response = await api.post(`/blogs/${postId}/save`);
       return response.data;
     } catch (error) {
       console.error("ERROR SAVE POST", error);
@@ -102,10 +84,30 @@ export default {
   // Unsave a post
   async unsavePost(postId) {
     try {
-      const response = await api.post(`/blogs/unsave/${postId}`);
+      const response = await api.post(`/blogs/${postId}/unsave`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNSAVE POST", error);
+      throw error;
+    }
+  },
+  async reportPost(postId) {
+    try {
+      const response = await api.post(`/blogs/${postId}/report`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR REPORT POST", error);
+      throw error;
+    }
+  },
+
+  // Unsave a post
+  async unreportPost(postId) {
+    try {
+      const response = await api.post(`/blogs/${postId}/unreport`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR UNREPORT POST", error);
       throw error;
     }
   },

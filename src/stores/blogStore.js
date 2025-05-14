@@ -86,15 +86,8 @@ export const useBlogStore = defineStore("blog", {
       }
     },
 
-    async deletePost(postId) {
-      this.error = null;
-      try {
-        await blogService.deletePost(postId);
-        this.publicPosts = this.publicPosts.filter((p) => p.id !== postId);
-      } catch (error) {
-        this.error = "Failed to delete post. Please try again.";
-        throw error;
-      }
+    removePostById(postId) {
+      this.publicPosts = this.publicPosts.filter((p) => p.id !== postId);
     },
 
     async likePost(postId) {

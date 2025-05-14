@@ -3,28 +3,10 @@ import { ref, computed, watch, onMounted } from "vue";
 import { debounce } from "lodash";
 import SearchBar from "./SearchBar.vue";
 import { useBlogStore } from "@/stores/blogStore";
-import { useBlogSearchStore } from "@/stores/blogSearchStore";
 import hashtagService from "@/services/hashtagService";
-
-const blogStore = useBlogStore();
-const blogSearchStore = useBlogSearchStore();
-const searchQuery = ref(blogSearchStore.getQuery);
 
 // Popular tags that could be derived from actual data in a real app
 const popularTags = ref([]);
-
-const debouncedSearch = debounce((newQuery) => {
-  blogSearchStore.setQuery(newQuery);
-}, 300);
-
-watch(searchQuery, (newQuery) => {
-  debouncedSearch(newQuery);
-});
-
-const filterByTag = (tag) => {
-  searchQuery.value = `#${tag}`;
-  blogSearchStore.setQuery(`#${tag}`);
-};
 
 onMounted(async () => {
   if (!popularTags.value.length) {
@@ -59,7 +41,6 @@ onMounted(async () => {
           size="small"
           color="primary"
           outlined
-          @click="filterByTag(tag)"
           class="cursor-pointer"
         >
           #{{ tag }}

@@ -103,7 +103,7 @@
                 </div>
                 <div>
                   <div class="text-lg font-bold text-blue-800">
-                    {{ profileUser.followerCount }}
+                    {{ profileUser.followersCount }}
                   </div>
                   <div class="text-xs text-gray-500">Followers</div>
                 </div>

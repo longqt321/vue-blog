@@ -11,16 +11,6 @@ export default {
     }
   },
 
-  async getCurrentUser() {
-    try {
-      const response = await api.get("/user/current");
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  },
-
   async getUserById(id) {
     try {
       const response = await api.get(`/users/${id}`);
@@ -34,7 +24,7 @@ export default {
   // Follow a user
   async followUser(userId) {
     try {
-      const response = await api.post(`/users/follow/${userId}`);
+      const response = await api.post(`/users/${userId}/follow`);
       return response.data;
     } catch (error) {
       console.error("ERROR FOLLOW USER!!", error);
@@ -45,7 +35,7 @@ export default {
   // Unfollow a user
   async unfollowUser(userId) {
     try {
-      const response = await api.post(`/users/unfollow/${userId}`);
+      const response = await api.post(`/users/${userId}/unfollow`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNFOLLOW USER!!", error);
@@ -56,7 +46,7 @@ export default {
   // Block a user
   async blockUser(userId) {
     try {
-      const response = await api.post(`/users/block/${userId}`);
+      const response = await api.post(`/users/${userId}/block`);
       return response.data;
     } catch (error) {
       console.error("ERROR BLOCK USER!!", error);
@@ -67,7 +57,7 @@ export default {
   // Unblock a user
   async unblockUser(userId) {
     try {
-      const response = await api.post(`/users/unblock/${userId}`);
+      const response = await api.post(`/users/${userId}/unblock`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNBLOCK USER!!", error);

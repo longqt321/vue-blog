@@ -10,14 +10,6 @@
           <va-icon name="edit" color="#3B82F6" class="mr-3" />
           <span>Chỉnh sửa bài viết</span>
         </button>
-
-        <button
-          @click="handlePinPost"
-          class="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
-        >
-          <va-icon name="push_pin" color="#3B82F6" class="mr-3" />
-          <span>{{ isPinned ? "Bỏ ghim bài viết" : "Ghim bài viết" }}</span>
-        </button>
         <button
           @click="handleDeletePost"
           class="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center text-red-600 transition-colors duration-200"
@@ -46,7 +38,7 @@
         </button>
 
         <button
-          @click="handleHideUser"
+          @click="handleBlockUser"
           class="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
         >
           <va-icon name="person_off" color="#3B82F6" class="mr-3" />
@@ -99,7 +91,6 @@ const props = defineProps({
 
 const emit = defineEmits([
   "edit-post",
-  "pin-post",
   "hide-post",
   "save-post",
   "hide-user",
@@ -111,10 +102,6 @@ const handleEditPost = () => {
   emit("edit-post", props.post.id);
 };
 
-const handlePinPost = () => {
-  emit("pin-post", props.post.id);
-};
-
 const handleHidePost = () => {
   emit("hide-post", props.post.id);
 };
@@ -123,8 +110,8 @@ const handleSavePost = () => {
   emit("save-post", props.post.id);
 };
 
-const handleHideUser = () => {
-  emit("hide-user", props.post.author.id);
+const handleBlockUser = () => {
+  emit("block-user", props.post.author.id);
 };
 
 const handleDeletePost = () => {

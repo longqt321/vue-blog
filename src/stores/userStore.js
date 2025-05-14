@@ -5,6 +5,7 @@ import { defineStore } from "pinia";
 import userService from "@/services/userService";
 import blogService from "@/services/blogService";
 import defaultAvatar from "@/assets/avatar.jpg";
+import { useAuthStore } from "./authStore";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -15,8 +16,9 @@ export const useUserStore = defineStore("user", {
       avatar: defaultAvatar,
       bio: "",
       createdAt: null,
-      followers: 0,
-      following: 0,
+      followersCount: 0,
+      followingCount: 0,
+      postCount: 0,
     },
     personalBlogs: [],
     savedBlogs: [],
@@ -43,7 +45,7 @@ export const useUserStore = defineStore("user", {
           avatar: data.avatar || defaultAvatar,
           description: data.description || "",
           createdAt: data.createdAt,
-          followerCount: data.followerCount || 0,
+          followersCount: data.followersCount || 0,
           followingCount: data.followingCount || 0,
           postCount: data.postCount || 0,
         };
@@ -58,11 +60,21 @@ export const useUserStore = defineStore("user", {
     async fetchPersonalBlogs() {
       this.isLoadingPersonalBlogs = true;
       this.personalBlogsError = null;
+      const authStore = useAuthStore();
 
       try {
-        const response = await blogService.getPosts({
-          authorId: this.profile.id,
-        });
+        let response = {};
+        if (authStore.user.id !== this.profile.id) {
+          response = await blogService.getPosts({
+            authorId: this.profile.id,
+            visibility: "PUBLIC",
+          });
+        } else {
+          response = await blogService.getPosts({
+            authorId: this.profile.id,
+          });
+        }
+
         if (!response.success) {
           this.personalBlogsError = response.message || "Failed to load blogs.";
           return;
@@ -93,6 +105,19 @@ export const useUserStore = defineStore("user", {
         this.savedBlogs = response.data.content;
       } catch (error) {
         console.error(error);
+      }
+    },
+    removePostById(postId) {
+      this.personalBlogs = this.personalBlogs.filter((p) => p.id !== postId);
+      this.savedBlogs = this.savedBlogs.filter((p) => p.id !== postId);
+      this.profile.postCount = this.profile.postCount - 1;
+    },
+    syncChanges(postId, postData) {
+      const personalIndex = this.personalBlogs.findIndex(
+        (post) => post.id === postId
+      );
+      if (personalIndex !== -1) {
+        this.personalBlogs[personalIndex] = postData;
       }
     },
   },

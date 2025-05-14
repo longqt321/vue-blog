@@ -39,12 +39,5 @@ const goToProfile = () => {
         Online
       </div>
     </div>
-    <va-button
-      text
-      color="primary"
-      size="small"
-      icon="message"
-      class="flex-shrink-0"
-    />
   </div>
 </template>
