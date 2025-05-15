@@ -25,7 +25,10 @@ const editingPostId = ref(null);
 const isOpen = computed(() => modalStore.isModalOpen);
 const isEditMode = computed(() => modalStore.isInEditMode);
 const isFormValid = computed(
-  () => title.value.trim() !== "" && textContent.value.trim() !== ""
+  () =>
+    title.value.trim() !== "" &&
+    textContent.value.trim() !== "" &&
+    selectedVisibility.value.trim() !== ""
 );
 
 // Populate form with post data when in edit mode

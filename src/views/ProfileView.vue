@@ -1,7 +1,8 @@
 <template>
   <div class="bg-blue-50 min-h-screen">
     <NavBar />
-
+    <UserEditModal />
+    <PostCreationModal />
     <div class="container mx-auto px-4 py-6">
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Left sidebar -->
@@ -37,6 +38,7 @@
                   color="primary"
                   icon="edit"
                   class="w-full"
+                  @click="modalStore.openModalForEditUser(profileUser)"
                 >
                   Edit Profile
                 </va-button>
@@ -222,11 +224,11 @@ import { useBlogStore } from "@/stores/blogStore";
 import { useUserStore } from "@/stores/userStore";
 import NavBar from "@/components/NavBar.vue";
 import BlogPost from "@/components/BlogPost.vue";
-import PostCreationModal from "@/components/PostCreationModal.vue";
 import userService from "@/services/userService";
-import { normalizeUser } from "@/composables/userFormater";
+import UserEditModal from "@/components/UserEditModal.vue";
 import { formatTime } from "@/composables/timeFormatter";
-import CreatePostArea from "@/components/CreatePostArea.vue";
+import { useModalStore } from "@/stores/modalStore";
+import PostCreationModal from "@/components/PostCreationModal.vue";
 
 // User relationship enum
 const UserRelationship = Object.freeze({
@@ -238,6 +240,7 @@ const UserRelationship = Object.freeze({
 const authStore = useAuthStore();
 const blogStore = useBlogStore();
 const userStore = useUserStore();
+const modalStore = useModalStore();
 const route = useRoute();
 const router = useRouter();
 

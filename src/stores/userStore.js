@@ -40,7 +40,9 @@ export const useUserStore = defineStore("user", {
         console.log(data);
         this.profile = {
           id: data.id,
-          fullName: `${data.firstName} ${data.lastName}`,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          fullName: `${data.lastName} ${data.firstName}`,
           username: data.username,
           avatar: data.avatar || defaultAvatar,
           description: data.description || "",

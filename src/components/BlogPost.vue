@@ -40,7 +40,7 @@
             class="hover:bg-blue-50"
           />
           <!-- Post Options Dropdown -->
-          <BaseDropdown v-if="showOptionsDropdown" class="w-64 right-0">
+          <BaseDropdown v-if="showOptionsDropdown" class="w-64 ridght-0">
             <PostOptionsDropdown
               :post="post"
               :is-owner="isPostOwner"
@@ -115,7 +115,7 @@
           @click="handleLikePost"
           :class="[
             'flex items-center',
-            post.liked ? 'text-blue-600' : 'text-gray-600',
+            isLiked ? 'text-blue-600' : 'text-gray-600',
           ]"
         >
           <va-icon name="thumb_up" />
@@ -163,7 +163,8 @@ const showOptionsDropdown = ref(false);
 const dropdownRef = ref(null); // Reference to track the dropdown element
 
 // Post state
-const isSaved = ref(props.post.isSaved || false);
+const isSaved = ref(props.post.relationship.saved);
+const isLiked = ref(props.post.relationship.liked);
 const isPrivate = computed(() => props.post.visibility == "PRIVATE");
 
 // Check if current user is the owner of the post
@@ -180,11 +181,12 @@ const handleHide = () => {
 
 const handleLikePost = async () => {
   try {
-    if (props.post.liked) {
+    if (isLiked.value) {
       await blogStore.unlikePost(props.post.id);
     } else {
       await blogStore.likePost(props.post.id);
     }
+    isLiked.value = !isLiked.value;
   } catch (error) {
     console.error("Failed to toggle like status", error);
     // Could show a toast notification here
@@ -222,14 +224,15 @@ const handleHidePost = (postId) => {
 
 const handleSavePost = async (postId) => {
   console.log(`${isSaved.value ? "Unsave" : "Save"} post with id ${postId}`);
-  isSaved.value = !isSaved.value;
-  showOptionsDropdown.value = false;
+
   try {
-    if (isSaved) {
+    if (isSaved.value) {
       await blogService.unsavePost(postId);
     } else {
       await blogService.savePost(postId);
     }
+    showOptionsDropdown.value = false;
+    isSaved.value = !isSaved.value;
   } catch (error) {
     console.error(error);
   }

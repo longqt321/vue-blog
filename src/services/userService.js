@@ -76,9 +76,9 @@ export default {
   },
 
   // Update user profile
-  async updateProfile(userData) {
+  async updateUser(userId, userData) {
     try {
-      const response = await api.put("/users/profile", userData);
+      const response = await api.put(`/users/${userId}`, userData);
       return response.data;
     } catch (error) {
       console.error("ERROR UPDATE PROFILE!!", error);

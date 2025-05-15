@@ -73,6 +73,7 @@ export default {
   async savePost(postId) {
     try {
       const response = await api.post(`/blogs/${postId}/save`);
+      console.log(response);
       return response.data;
     } catch (error) {
       console.error("ERROR SAVE POST", error);

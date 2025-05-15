@@ -8,6 +8,8 @@ export const useModalStore = defineStore("modal", {
     isModalOpen: false,
     isInEditMode: false,
     postBeingEdited: null,
+    isUserEditOpen: false,
+    userBeingEdited: null,
   }),
   actions: {
     openModalForCreate() {
@@ -16,9 +18,15 @@ export const useModalStore = defineStore("modal", {
       this.postBeingEdited = null;
     },
     openModalForEdit(post) {
+      console.log(post);
       this.isModalOpen = true;
       this.isInEditMode = true;
       this.postBeingEdited = post;
+    },
+    openModalForEditUser(user) {
+      console.log(user);
+      this.isUserEditOpen = true;
+      this.userBeingEdited = user;
     },
     closeModal() {
       this.isModalOpen = false;

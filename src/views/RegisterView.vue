@@ -24,23 +24,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
-              for="firstName"
-              class="block text-sm font-medium text-blue-800 mb-1"
-            >
-              Tên <span class="text-red-500">*</span>
-            </label>
-            <va-input
-              id="firstName"
-              v-model="formData.firstName"
-              placeholder="Nhập tên"
-              class="w-full"
-              color="primary"
-              :error="!!errors.firstName"
-              :error-messages="errors.firstName"
-            />
-          </div>
-          <div>
-            <label
               for="lastName"
               class="block text-sm font-medium text-blue-800 mb-1"
             >
@@ -54,6 +37,23 @@
               color="primary"
               :error="!!errors.lastName"
               :error-messages="errors.lastName"
+            />
+          </div>
+          <div>
+            <label
+              for="firstName"
+              class="block text-sm font-medium text-blue-800 mb-1"
+            >
+              Tên <span class="text-red-500">*</span>
+            </label>
+            <va-input
+              id="firstName"
+              v-model="formData.firstName"
+              placeholder="Nhập tên"
+              class="w-full"
+              color="primary"
+              :error="!!errors.firstName"
+              :error-messages="errors.firstName"
             />
           </div>
         </div>
@@ -75,27 +75,6 @@
             :error="!!errors.username"
             :error-messages="errors.username"
             prepend-inner-icon="person"
-          />
-        </div>
-
-        <!-- Email Field -->
-        <div>
-          <label
-            for="email"
-            class="block text-sm font-medium text-blue-800 mb-1"
-          >
-            Email <span class="text-red-500">*</span>
-          </label>
-          <va-input
-            id="email"
-            v-model="formData.email"
-            type="email"
-            placeholder="Nhập địa chỉ email"
-            class="w-full"
-            color="primary"
-            :error="!!errors.email"
-            :error-messages="errors.email"
-            prepend-inner-icon="email"
           />
         </div>
 
@@ -138,46 +117,6 @@
             :error="!!errors.confirmPassword"
             :error-messages="errors.confirmPassword"
             prepend-inner-icon="lock"
-          />
-        </div>
-
-        <!-- School Field -->
-        <div>
-          <label
-            for="school"
-            class="block text-sm font-medium text-blue-800 mb-1"
-          >
-            Trường <span class="text-red-500">*</span>
-          </label>
-          <va-input
-            id="school"
-            v-model="formData.school"
-            placeholder="Tên trường học"
-            class="w-full"
-            color="primary"
-            :error="!!errors.school"
-            :error-messages="errors.school"
-            prepend-inner-icon="school"
-          />
-        </div>
-
-        <!-- Class Field -->
-        <div>
-          <label
-            for="class"
-            class="block text-sm font-medium text-blue-800 mb-1"
-          >
-            Lớp <span class="text-red-500">*</span>
-          </label>
-          <va-input
-            id="class"
-            v-model="formData.class"
-            placeholder="Tên lớp"
-            class="w-full"
-            color="primary"
-            :error="!!errors.class"
-            :error-messages="errors.class"
-            prepend-inner-icon="groups"
           />
         </div>
 
@@ -248,11 +187,8 @@ const formData = ref({
   firstName: "",
   lastName: "",
   username: "",
-  email: "",
   password: "",
   confirmPassword: "",
-  school: "",
-  class: "",
   agreeToTerms: false,
 });
 
@@ -278,12 +214,6 @@ const validateForm = () => {
     errors.value.username = "Tên đăng nhập phải có ít nhất 3 ký tự";
   }
 
-  if (!formData.value.email) {
-    errors.value.email = "Email không được để trống";
-  } else if (!/^\S+@\S+\.\S+$/.test(formData.value.email)) {
-    errors.value.email = "Email không hợp lệ";
-  }
-
   if (!formData.value.password) {
     errors.value.password = "Mật khẩu không được để trống";
   } else if (formData.value.password.length < 6) {
@@ -294,14 +224,6 @@ const validateForm = () => {
     errors.value.confirmPassword = "Xác nhận mật khẩu không được để trống";
   } else if (formData.value.confirmPassword !== formData.value.password) {
     errors.value.confirmPassword = "Mật khẩu xác nhận không khớp";
-  }
-
-  if (!formData.value.school) {
-    errors.value.school = "Trường không được để trống";
-  }
-
-  if (!formData.value.class) {
-    errors.value.class = "Lớp không được để trống";
   }
 
   if (!formData.value.agreeToTerms) {
@@ -323,10 +245,7 @@ const handleRegister = async () => {
       firstName: formData.value.firstName,
       lastName: formData.value.lastName,
       username: formData.value.username,
-      email: formData.value.email,
       password: formData.value.password,
-      school: formData.value.school,
-      class: formData.value.class,
     };
 
     const response = await authService.register(userData);
