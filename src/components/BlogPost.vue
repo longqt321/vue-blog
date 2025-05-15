@@ -173,6 +173,10 @@ const isPostOwner = computed(() => {
   return authStore.getUser.id === props.post.author.id;
 });
 
+const toggleOptionsDropdown = () => {
+  showOptionsDropdown.value = !showOptionsDropdown.value;
+};
+
 // Handlers for post options
 const handleHide = () => {
   // Would typically call a method in the blogStore to hide this post
@@ -191,10 +195,6 @@ const handleLikePost = async () => {
     console.error("Failed to toggle like status", error);
     // Could show a toast notification here
   }
-};
-
-const toggleOptionsDropdown = () => {
-  showOptionsDropdown.value = !showOptionsDropdown.value;
 };
 
 // Click outside detection handler
@@ -228,6 +228,7 @@ const handleSavePost = async (postId) => {
   try {
     if (isSaved.value) {
       await blogService.unsavePost(postId);
+      userStore.removeSavedPostById(postId);
     } else {
       await blogService.savePost(postId);
     }
@@ -249,7 +250,7 @@ const handleDeletePost = async (postId) => {
   showOptionsDropdown.value = false;
   await blogService.deletePost(postId);
   blogStore.removePostById(postId);
-  userStore.removePostById(postId);
+  userStore.removePersonalPostById(postId);
 };
 
 const handleReport = (postId) => {

@@ -109,10 +109,13 @@ export const useUserStore = defineStore("user", {
         console.error(error);
       }
     },
-    removePostById(postId) {
+    removePersonalPostById(postId) {
       this.personalBlogs = this.personalBlogs.filter((p) => p.id !== postId);
       this.savedBlogs = this.savedBlogs.filter((p) => p.id !== postId);
-      this.profile.postCount = this.profile.postCount - 1;
+      this.profile.postCount = this.personalBlogs.length;
+    },
+    removeSavedPostById(postId) {
+      this.savedBlogs = this.savedBlogs.filter((p) => p.id !== postId);
     },
     syncChanges(postId, postData) {
       const personalIndex = this.personalBlogs.findIndex(
