@@ -8,11 +8,11 @@ const userStore = useUserStore();
 const userSearch = ref("");
 const isLoading = ref(false);
 
-const suggestedUsers = ref([]);
+const suggestedUsers = computed(() => userStore.getSuggestedUsers);
 
 onMounted(async () => {
   if (!suggestedUsers.value.length) {
-    suggestedUsers.value = await userService.getUsers();
+    await userStore.fetchSuggestedUsers();
   }
 });
 </script>
@@ -47,28 +47,31 @@ onMounted(async () => {
       <h3 class="font-medium text-blue-800 mb-3">Popular users</h3>
       <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
         <!-- Loading State -->
-        <div v-if="isLoading" class="py-2 text-center">
-          <va-progress-circle indeterminate color="primary" size="small" />
-        </div>
+        <VaInfiniteScroll>
+          <div v-if="isLoading" class="py-2 text-center">
+            <va-progress-circle indeterminate color="primary" size="small" />
+          </div>
 
-        <!-- No Friends State -->
-        <div
-          v-else-if="suggestedUsers.length === 0"
-          class="text-center py-4 text-gray-500"
-        >
-          <va-icon name="people_alt" size="large" color="#4285F4" />
-          <p class="mt-2">No users suggested</p>
-        </div>
+          <!-- No Friends State -->
+          <div
+            v-else-if="suggestedUsers.length === 0"
+            class="text-center py-4 text-gray-500"
+          >
+            <va-icon name="people_alt" size="large" color="#4285F4" />
+            <p class="mt-2">No users suggested</p>
+          </div>
 
-        <!-- Friends List -->
-        <Friend
-          v-else
-          v-for="friend in suggestedUsers"
-          :key="friend.id"
-          :friend="friend"
-          @click="console.log(123)"
-          class="hover:bg-blue-50 transition duration-200 rounded-lg"
-        />
+          <!-- Friends List -->
+
+          <Friend
+            v-else
+            v-for="friend in suggestedUsers"
+            :key="friend.id"
+            :friend="friend"
+            @click="console.log(123)"
+            class="hover:bg-blue-50 transition duration-200 rounded-lg"
+          />
+        </VaInfiniteScroll>
       </div>
     </div>
   </div>

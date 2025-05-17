@@ -3,7 +3,7 @@ import api from "./api";
 export default {
   async getUsers() {
     try {
-      const response = await api.get("/users");
+      const response = await api.get("/users/search");
       return response.data;
     } catch (error) {
       console.error("ERROR FETCH USERS!!", error);

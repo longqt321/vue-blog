@@ -22,6 +22,9 @@ export const useUserStore = defineStore("user", {
     },
     personalBlogs: [],
     savedBlogs: [],
+    suggestedUsers: [],
+    isLoadingSuggestedUsers: false,
+    suggestedUsersError: null,
     isLoadingProfile: false,
     isLoadingPersonalBlogs: false,
     isLoadingSavedBlogs: false,
@@ -109,6 +112,22 @@ export const useUserStore = defineStore("user", {
         console.error(error);
       }
     },
+    async fetchSuggestedUsers() {
+      this.isLoadingSuggestedUsers = true;
+      this.suggestedUsersError = null;
+      try {
+        const response = await userService.getUsers();
+        if (!response.success) {
+          this.suggestedUsersError =
+            response.message || "Failed to load suggested users";
+          return;
+        }
+        this.suggestedUsers = response.data.content;
+      } catch (error) {
+        this.suggestedUsersError = response.message;
+        console.error(error);
+      }
+    },
     removePersonalPostById(postId) {
       this.personalBlogs = this.personalBlogs.filter((p) => p.id !== postId);
       this.savedBlogs = this.savedBlogs.filter((p) => p.id !== postId);
@@ -135,5 +154,6 @@ export const useUserStore = defineStore("user", {
     getProfileError: (state) => state.profileError,
     getPersonalBlogsError: (state) => state.personalBlogsError,
     getSavedBlogs: (state) => state.savedBlogs,
+    getSuggestedUsers: (state) => state.suggestedUsers,
   },
 });
