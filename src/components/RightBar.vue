@@ -6,13 +6,21 @@ import userService from "@/services/userService";
 
 const userStore = useUserStore();
 const userSearch = ref("");
-const isLoading = ref(false);
+const isLoading = computed(() => userStore.isSuggestedUsersLoading);
 
 const suggestedUsers = computed(() => userStore.getSuggestedUsers);
 
+const loadMoreSuggestedUser = async () => {
+  console.log(
+    "Loading more users from page:",
+    userStore.getSuggestedUsersCurrentPage + 1
+  );
+  await userStore.loadMoreSuggestedUsers();
+};
+
 onMounted(async () => {
   if (!suggestedUsers.value.length) {
-    await userStore.fetchSuggestedUsers();
+    await userStore.fetchSuggestedUsers(0);
   }
 });
 </script>
@@ -47,7 +55,7 @@ onMounted(async () => {
       <h3 class="font-medium text-blue-800 mb-3">Popular users</h3>
       <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
         <!-- Loading State -->
-        <VaInfiniteScroll>
+        <VaInfiniteScroll :load="loadMoreSuggestedUser">
           <div v-if="isLoading" class="py-2 text-center">
             <va-progress-circle indeterminate color="primary" size="small" />
           </div>

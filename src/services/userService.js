@@ -1,9 +1,15 @@
 import api from "./api";
 
 export default {
-  async getUsers() {
+  async getUsers(page = 0, size = 3) {
     try {
-      const response = await api.get("/users/search");
+      const params = {
+        page,
+        size,
+      };
+      const response = await api.get("/users/search", {
+        params,
+      });
       return response.data;
     } catch (error) {
       console.error("ERROR FETCH USERS!!", error);

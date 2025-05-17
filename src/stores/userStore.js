@@ -25,6 +25,12 @@ export const useUserStore = defineStore("user", {
       savedBlogs: [],
       suggestedUsers: [],
     },
+    currentPage: {
+      suggestedUsers: 0,
+    },
+    moreDataAvailable: {
+      suggestedUsers: false,
+    },
     loading: {
       loading: false,
       personalBlogs: false,
@@ -121,21 +127,47 @@ export const useUserStore = defineStore("user", {
         this.loading.savedBlogs = false;
       }
     },
-    async fetchSuggestedUsers() {
+    async fetchSuggestedUsers(page = 0) {
       this.loading.suggestedUsers = true;
       this.error.suggestedUsers = null;
       try {
-        const response = await userService.getUsers();
+        const response = await userService.getUsers(page);
         if (!response.success) {
-          this.suggestedUsersError =
+          this.error.suggestedUsers =
             response.message || "Failed to load suggested users";
           return;
         }
-        this.data.suggestedUsers = response.data.content;
+        const pageData = response.data;
+
+        // If page is 0, replace the array, otherwise append the new content
+        if (page === 0) {
+          this.data.suggestedUsers = pageData.content;
+        } else {
+          this.data.suggestedUsers = [
+            ...this.data.suggestedUsers,
+            ...pageData.content,
+          ];
+        }
+
+        this.moreDataAvailable.suggestedUsers = !pageData.last;
+        this.currentPage.suggestedUsers = page;
       } catch (error) {
-        this.error.suggestedUsers = response.message;
+        this.error.suggestedUsers = error.message || "An error occurred";
         console.error(error);
+      } finally {
+        this.loading.suggestedUsers = false;
       }
+    },
+    async loadMoreSuggestedUsers() {
+      if (
+        !this.moreDataAvailable.suggestedUsers ||
+        this.loading.suggestedUsers
+      ) {
+        return Promise.resolve();
+      }
+      return await this.fetchSuggestedUsers(
+        this.currentPage.suggestedUsers + 1
+      );
     },
     removePersonalPostById(postId) {
       this.data.personalBlogs = this.data.personalBlogs.filter(
@@ -174,5 +206,6 @@ export const useUserStore = defineStore("user", {
     getPersonalBlogsError: (state) => state.error.personalBlogs,
     getSavedBlogsError: (state) => state.error.savedBlogs,
     getSuggestedUsersError: (state) => state.error.suggestedUsers,
+    getSuggestedUsersCurrentPage: (state) => state.currentPage.suggestedUsers,
   },
 });
