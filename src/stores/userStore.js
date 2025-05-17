@@ -20,23 +20,29 @@ export const useUserStore = defineStore("user", {
       followingCount: 0,
       postCount: 0,
     },
-    personalBlogs: [],
-    savedBlogs: [],
-    suggestedUsers: [],
-    isLoadingSuggestedUsers: false,
-    suggestedUsersError: null,
-    isLoadingProfile: false,
-    isLoadingPersonalBlogs: false,
-    isLoadingSavedBlogs: false,
-    profileError: null,
-    personalBlogsError: null,
-    savedBlogsError: null,
+    data: {
+      personalBlogs: [],
+      savedBlogs: [],
+      suggestedUsers: [],
+    },
+    loading: {
+      loading: false,
+      personalBlogs: false,
+      savedBlogs: false,
+      suggestedUsers: false,
+    },
+    error: {
+      suggestedUsers: null,
+      profile: null,
+      personalBlogs: null,
+      savedBlogs: null,
+    },
   }),
 
   actions: {
     async fetchProfile(id) {
-      this.isLoadingProfile = true;
-      this.profileError = null;
+      this.loading.profile = true;
+      this.error.profile = null;
 
       try {
         const data = await userService.getUserById(id);
@@ -56,15 +62,15 @@ export const useUserStore = defineStore("user", {
         };
       } catch (error) {
         console.error("ERROR FETCHING PROFILE", error);
-        this.profileError = "Failed to load profile.";
+        this.error.profile = "Failed to load profile.";
       } finally {
-        this.isLoadingProfile = false;
+        this.loading.profile = false;
       }
     },
 
     async fetchPersonalBlogs() {
-      this.isLoadingPersonalBlogs = true;
-      this.personalBlogsError = null;
+      this.loading.personalBlogs = true;
+      this.error.personalBlogs = null;
       const authStore = useAuthStore();
 
       try {
@@ -81,40 +87,43 @@ export const useUserStore = defineStore("user", {
         }
 
         if (!response.success) {
-          this.personalBlogsError = response.message || "Failed to load blogs.";
+          this.error.personalBlogs =
+            response.message || "Failed to load blogs.";
           return;
         }
 
-        this.personalBlogs = response.data.content;
+        this.data.personalBlogs = response.data.content;
       } catch (error) {
         console.error("ERROR FETCHING PERSONAL BLOGS", error);
         this.personalBlogsError = "Failed to load personal blogs.";
         throw error;
       } finally {
-        this.isLoadingPersonalBlogs = false;
+        this.loading.personalBlogs = false;
       }
     },
     async fetchSavedBlogs() {
-      this.isLoadingSavedBlogs = true;
-      this.savedBlogsError = null;
+      this.loading.savedBlogs = true;
+      this.error.savedBlogs = null;
       try {
         const response = await blogService.getPosts({
           userId: this.profile.id,
           relationshipType: "SAVED",
         });
         if (!response.success) {
-          this.savedBlogsError = response.message || "Failed to load blogs.";
+          this.error.savedBlogs = response.message || "Failed to load blogs.";
           return;
         }
 
-        this.savedBlogs = response.data.content;
+        this.data.savedBlogs = response.data.content;
       } catch (error) {
         console.error(error);
+      } finally {
+        this.loading.savedBlogs = false;
       }
     },
     async fetchSuggestedUsers() {
-      this.isLoadingSuggestedUsers = true;
-      this.suggestedUsersError = null;
+      this.loading.suggestedUsers = true;
+      this.error.suggestedUsers = null;
       try {
         const response = await userService.getUsers();
         if (!response.success) {
@@ -122,38 +131,48 @@ export const useUserStore = defineStore("user", {
             response.message || "Failed to load suggested users";
           return;
         }
-        this.suggestedUsers = response.data.content;
+        this.data.suggestedUsers = response.data.content;
       } catch (error) {
-        this.suggestedUsersError = response.message;
+        this.error.suggestedUsers = response.message;
         console.error(error);
       }
     },
     removePersonalPostById(postId) {
-      this.personalBlogs = this.personalBlogs.filter((p) => p.id !== postId);
-      this.savedBlogs = this.savedBlogs.filter((p) => p.id !== postId);
-      this.profile.postCount = this.personalBlogs.length;
+      this.data.personalBlogs = this.data.personalBlogs.filter(
+        (p) => p.id !== postId
+      );
+      this.data.savedBlogs = this.data.savedBlogs.filter(
+        (p) => p.id !== postId
+      );
+      this.profile.postCount = this.data.personalBlogs.length;
     },
     removeSavedPostById(postId) {
-      this.savedBlogs = this.savedBlogs.filter((p) => p.id !== postId);
+      this.data.savedBlogs = this.data.savedBlogs.filter(
+        (p) => p.id !== postId
+      );
     },
     syncChanges(postId, postData) {
-      const personalIndex = this.personalBlogs.findIndex(
+      const personalIndex = this.data.personalBlogs.findIndex(
         (post) => post.id === postId
       );
       if (personalIndex !== -1) {
-        this.personalBlogs[personalIndex] = postData;
+        this.data.personalBlogs[personalIndex] = postData;
       }
     },
   },
 
   getters: {
     getProfile: (state) => state.profile,
-    getPersonalBlogs: (state) => state.personalBlogs,
-    isProfileLoading: (state) => state.isLoadingProfile,
-    isBlogsLoading: (state) => state.isLoadingPersonalBlogs,
-    getProfileError: (state) => state.profileError,
-    getPersonalBlogsError: (state) => state.personalBlogsError,
-    getSavedBlogs: (state) => state.savedBlogs,
-    getSuggestedUsers: (state) => state.suggestedUsers,
+    getPersonalBlogs: (state) => state.data.personalBlogs,
+    getSavedBlogs: (state) => state.data.savedBlogs,
+    getSuggestedUsers: (state) => state.data.suggestedUsers,
+    isProfileLoading: (state) => state.loading.profile,
+    isPersonalBlogsLoading: (state) => state.loading.personalBlogs,
+    isSavedBlogsLoading: (state) => state.loading.savedBlogs,
+    isSuggestedUsersLoading: (state) => state.loading.suggestedUsers,
+    getProfileError: (state) => state.error.profile,
+    getPersonalBlogsError: (state) => state.error.personalBlogs,
+    getSavedBlogsError: (state) => state.error.savedBlogs,
+    getSuggestedUsersError: (state) => state.error.suggestedUsers,
   },
 });
