@@ -9,6 +9,9 @@ const userSearch = ref("");
 const isLoading = computed(() => userStore.isSuggestedUsersLoading);
 
 const suggestedUsers = computed(() => userStore.getSuggestedUsers);
+const moreSuggestedUsersAvailable = computed(
+  () => userStore.moreSuggestedUsersAvailable
+);
 
 const loadMoreSuggestedUser = async () => {
   console.log(
@@ -55,7 +58,10 @@ onMounted(async () => {
       <h3 class="font-medium text-blue-800 mb-3">Popular users</h3>
       <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
         <!-- Loading State -->
-        <VaInfiniteScroll :load="loadMoreSuggestedUser">
+        <VaInfiniteScroll
+          :load="loadMoreSuggestedUser"
+          :disabled="!moreSuggestedUsersAvailable"
+        >
           <div v-if="isLoading" class="py-2 text-center">
             <va-progress-circle indeterminate color="primary" size="small" />
           </div>

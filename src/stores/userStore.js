@@ -202,6 +202,8 @@ export const useUserStore = defineStore("user", {
     isPersonalBlogsLoading: (state) => state.loading.personalBlogs,
     isSavedBlogsLoading: (state) => state.loading.savedBlogs,
     isSuggestedUsersLoading: (state) => state.loading.suggestedUsers,
+    moreSuggestedUsersAvailable: (state) =>
+      state.moreDataAvailable.suggestedUsers,
     getProfileError: (state) => state.error.profile,
     getPersonalBlogsError: (state) => state.error.personalBlogs,
     getSavedBlogsError: (state) => state.error.savedBlogs,
