@@ -77,14 +77,14 @@ api.interceptors.response.use(
         const newAccessToken = response.data.accessToken;
 
         authStore.accessToken = newAccessToken;
-        console.log(failedQueue);
-        processQueue(null, newAccessToken);
+        processQueue(null, authStore.accessToken);
 
-        originalRequest.headers.Authorization = "Bearer " + newAccessToken;
+        originalRequest.headers.Authorization =
+          "Bearer " + authStore.accessToken;
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        authStore.logout?.();
+        authStore.logout();
         router.push("/login");
         return Promise.reject(err);
       } finally {

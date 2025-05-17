@@ -247,7 +247,7 @@ const router = useRouter();
 // State
 const activeTab = ref("posts");
 const userRelationship = ref(UserRelationship.NONE);
-const profileUser = ref(null);
+const profileUser = computed(() => userStore.getProfile);
 const tabs = ref([
   { id: "posts", name: "Posts" },
   { id: "saved", name: "Saved" },
@@ -319,7 +319,6 @@ const toggleRelationship = async (type) => {
 const fetchProfileUser = async () => {
   try {
     await userStore.fetchProfile(route.params.id);
-    profileUser.value = userStore.getProfile;
     // Fetch posts for this user using the userStore with username
     if (profileUser.value?.username) {
       await userStore.fetchPersonalBlogs();
