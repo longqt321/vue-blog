@@ -112,6 +112,7 @@
     <div class="border-t border-blue-50 p-3 bg-blue-50 flex justify-between">
       <div class="flex space-x-4">
         <button
+          v-if="!isPostOwner"
           @click="handleLikePost"
           :class="[
             'flex items-center',

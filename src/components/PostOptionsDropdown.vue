@@ -42,7 +42,7 @@
           class="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
         >
           <va-icon name="person_off" color="#3B82F6" class="mr-3" />
-          <span>Ẩn người dùng này</span>
+          <span>Chặn người dùng này</span>
         </button>
         <button
           @click="handleReport"
@@ -93,7 +93,7 @@ const emit = defineEmits([
   "edit-post",
   "hide-post",
   "save-post",
-  "hide-user",
+  "block-user",
   "delete-post",
   "report",
 ]);
