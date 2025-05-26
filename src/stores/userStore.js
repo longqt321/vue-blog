@@ -1,10 +1,6 @@
-// ✅ Refactor userStore — chỉ lưu thông tin người dùng hiện tại đang đăng nhập
-// ✅ Phù hợp với UI: avatar, tên, username, bio, ngày tạo, follower/following count, blogs
-
 import { defineStore } from "pinia";
 import userService from "@/services/userService";
 import blogService from "@/services/blogService";
-import defaultAvatar from "@/assets/avatar.jpg";
 import { useAuthStore } from "./authStore";
 
 export const useUserStore = defineStore("user", {
@@ -13,8 +9,8 @@ export const useUserStore = defineStore("user", {
       id: null,
       fullName: "",
       username: "",
-      avatar: defaultAvatar,
-      bio: "",
+      avatar: null,
+      description: "",
       createdAt: null,
       followersCount: 0,
       followingCount: 0,
@@ -52,6 +48,7 @@ export const useUserStore = defineStore("user", {
 
       try {
         const data = await userService.getUserById(id);
+
         console.log(data);
         this.profile = {
           id: data.id,
@@ -59,13 +56,14 @@ export const useUserStore = defineStore("user", {
           lastName: data.lastName,
           fullName: `${data.lastName} ${data.firstName}`,
           username: data.username,
-          avatar: data.avatar || defaultAvatar,
+          avatar: data.avatarUrl,
           description: data.description || "",
           createdAt: data.createdAt,
           followersCount: data.followersCount || 0,
           followingCount: data.followingCount || 0,
           postCount: data.postCount || 0,
         };
+        console.log("PROFILE DATA", this.profile.avatar);
       } catch (error) {
         console.error("ERROR FETCHING PROFILE", error);
         this.error.profile = "Failed to load profile.";

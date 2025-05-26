@@ -77,6 +77,25 @@
             prepend-inner-icon="person"
           />
         </div>
+        <!-- Email Field -->
+        <div>
+          <label
+            for="email"
+            class="block text-sm font-medium text-blue-800 mb-1"
+          >
+            Email <span class="text-red-500">*</span>
+          </label>
+          <va-input
+            id="email"
+            v-model="formData.email"
+            placeholder="Nhập email"
+            class="w-full"
+            color="primary"
+            :error="!!errors.email"
+            :error-messages="errors.email"
+            prepend-inner-icon="person"
+          />
+        </div>
 
         <!-- Password Field -->
         <div>
@@ -187,6 +206,7 @@ const formData = ref({
   firstName: "",
   lastName: "",
   username: "",
+  email: "",
   password: "",
   confirmPassword: "",
   agreeToTerms: false,
@@ -212,6 +232,15 @@ const validateForm = () => {
     errors.value.username = "Tên đăng nhập không được để trống";
   } else if (formData.value.username.length < 3) {
     errors.value.username = "Tên đăng nhập phải có ít nhất 3 ký tự";
+  }
+  if (!formData.value.email) {
+    errors.value.email = "Email không được để trống";
+  } else if (
+    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+      formData.value.email
+    )
+  ) {
+    errors.value.email = "Email không hợp lệ";
   }
 
   if (!formData.value.password) {
@@ -245,12 +274,12 @@ const handleRegister = async () => {
       firstName: formData.value.firstName,
       lastName: formData.value.lastName,
       username: formData.value.username,
+      email: formData.value.email,
       password: formData.value.password,
     };
 
     const response = await authService.register(userData);
-    authStore.setAuth(response);
-    router.push("/");
+    router.push("/login");
   } catch (error) {
     console.error("Registration error:", error);
     if (error.response && error.response.status === 409) {

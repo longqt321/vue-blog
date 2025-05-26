@@ -18,7 +18,7 @@
                 class="w-32 h-32 rounded-full border-4 border-blue-100 overflow-hidden bg-white mb-4"
               >
                 <img
-                  :src="'../assets/avatar.jpg'"
+                  :src="profileUser.avatar"
                   alt="Profile picture"
                   class="w-full h-full object-cover"
                 />

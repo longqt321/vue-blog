@@ -4,7 +4,7 @@
     <div class="flex items-center p-4 border-b border-blue-100">
       <div class="relative w-14 h-14">
         <img
-          src="../assets/avatar.jpg"
+          src="../assets/default-avatar.jpg"
           class="w-full h-full rounded-full border-2 border-blue-200"
           alt="Profile picture"
         />

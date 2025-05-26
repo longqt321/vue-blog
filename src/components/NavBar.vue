@@ -53,7 +53,7 @@
               class="flex items-center hover:bg-blue-600 rounded-md space-x-2 focus:outline-none"
             >
               <img
-                src="../assets/avatar.jpg"
+                src="../assets/default-avatar.jpg"
                 class="w-10 h-10 rounded-full border-2 border-white"
                 alt="User avatar"
               />
