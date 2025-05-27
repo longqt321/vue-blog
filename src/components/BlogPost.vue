@@ -45,10 +45,14 @@
               :post="post"
               :is-owner="isPostOwner"
               :is-saved="isSaved"
+              :is-hidden="isHidden"
+              :is-blocking-owner="isBlockingOwner"
+              :is-following-owner="isFollowingOwner"
               @edit-post="handleEditPost"
               @hide-post="handleHidePost"
               @save-post="handleSavePost"
               @block-user="handleBlockUser"
+              @follow-user="handleFollowUser"
               @delete-post="handleDeletePost"
               @report="handleReport"
             />
@@ -143,6 +147,7 @@ import BaseDropdown from "./BaseDropdown.vue";
 import PostOptionsDropdown from "./PostOptionsDropdown.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useModalStore } from "@/stores/modalStore";
+import userService from "@/services/userService";
 
 const props = defineProps({
   post: {
@@ -161,14 +166,16 @@ const contentRef = ref(null);
 const contentTooLong = ref(false);
 const expanded = ref(false);
 const showOptionsDropdown = ref(false);
-const dropdownRef = ref(null); // Reference to track the dropdown element
+const dropdownRef = ref(null);
 
 // Post state
 const isSaved = ref(props.post.relationship.saved);
 const isLiked = ref(props.post.relationship.liked);
+const isHidden = ref(props.post.relationship.hidden);
+const isBlockingOwner = ref(false);
+const isFollowingOwner = ref(false);
 const isPrivate = computed(() => props.post.visibility == "PRIVATE");
 
-// Check if current user is the owner of the post
 const isPostOwner = computed(() => {
   if (!authStore.isAuthenticated || !props.post.author) return false;
   return authStore.getUser.id === props.post.author.id;
@@ -178,12 +185,6 @@ const toggleOptionsDropdown = () => {
   showOptionsDropdown.value = !showOptionsDropdown.value;
 };
 
-// Handlers for post options
-const handleHide = () => {
-  // Would typically call a method in the blogStore to hide this post
-  console.log(`Hide post with id ${props.post.id}`);
-};
-
 const handleLikePost = async () => {
   try {
     if (isLiked.value) {
@@ -191,14 +192,13 @@ const handleLikePost = async () => {
     } else {
       await blogStore.likePost(props.post.id);
     }
-    isLiked.value = !isLiked.value;
+    await refreshPost();
   } catch (error) {
     console.error("Failed to toggle like status", error);
     // Could show a toast notification here
   }
 };
 
-// Click outside detection handler
 const handleClickOutside = (event) => {
   if (
     dropdownRef.value &&
@@ -209,23 +209,30 @@ const handleClickOutside = (event) => {
   }
 };
 
-// Options dropdown handlers
 const handleEditPost = (postId) => {
   console.log(`Edit post with id ${postId}`);
   showOptionsDropdown.value = false;
   modalStore.openModalForEdit(props.post);
-  // Pass the current post to the blog store for editing
 };
 
-const handleHidePost = (postId) => {
+const handleHidePost = async (postId) => {
   console.log(`Hide post with id ${postId}`);
   showOptionsDropdown.value = false;
-  // Additional hide logic would go here
+  try {
+    if (isHidden.value) {
+      await blogService.unhidePost(postId);
+      userStore.removeHiddenPostById(postId);
+    } else {
+      await blogService.hidePost(postId);
+      blogStore.removePostById(postId);
+    }
+    await refreshPost();
+  } catch (error) {
+    console.error("Failed to hide post", error);
+  }
 };
 
 const handleSavePost = async (postId) => {
-  console.log(`${isSaved.value ? "Unsave" : "Save"} post with id ${postId}`);
-
   try {
     if (isSaved.value) {
       await blogService.unsavePost(postId);
@@ -234,30 +241,89 @@ const handleSavePost = async (postId) => {
       await blogService.savePost(postId);
     }
     showOptionsDropdown.value = false;
-    isSaved.value = !isSaved.value;
+    await refreshPost();
   } catch (error) {
     console.error(error);
   }
 };
 
-const handleBlockUser = (userId) => {
-  console.log(`Hide user with id ${userId}`);
+// Refresh data để đồng bộ với CSDL
+async function refreshPost() {
+  if (props.post.id) {
+    try {
+      const response = await blogService.getPosts({ id: props.post.id });
+      const postData = response.data?.content?.[0] || response.data;
+      // console.log("Post data refreshed:", postData);
+      // console.log(response);
+      if (postData) {
+        isSaved.value = postData.relationship?.saved;
+        isHidden.value = postData.relationship?.hidden;
+        isLiked.value = postData.relationship?.liked;
+      }
+    } catch (e) {
+      console.error("Failed to refresh post data", e);
+    }
+  }
+  if (props.post.author?.id) {
+    try {
+      const response = await userService.getRelationship(props.post.author.id);
+      isBlockingOwner.value = response.data === "BLOCKING";
+      isFollowingOwner.value = response.data === "FOLLOWING";
+    } catch (e) {
+      isBlockingOwner.value = false;
+      isFollowingOwner.value = false;
+    }
+  }
+}
+
+const handleBlockUser = async (userId) => {
+  try {
+    if (isBlockingOwner.value) {
+      await userService.unblockUser(userId);
+    } else {
+      await userService.blockUser(userId);
+    }
+    await refreshPost();
+    showOptionsDropdown.value = false;
+  } catch (error) {
+    console.error("Failed to block user", error);
+  }
   showOptionsDropdown.value = false;
-  // Additional hide user logic would go here
+};
+
+const handleFollowUser = async (userId) => {
+  try {
+    if (isFollowingOwner.value) {
+      await userService.unfollowUser(userId);
+    } else {
+      await userService.followUser(userId);
+    }
+    await refreshPost();
+    showOptionsDropdown.value = false;
+  } catch (error) {
+    console.error("Failed to follow/unfollow user", error);
+  }
 };
 
 const handleDeletePost = async (postId) => {
-  console.log(`Delete post with id ${postId}`);
-  showOptionsDropdown.value = false;
-  await blogService.deletePost(postId);
-  blogStore.removePostById(postId);
-  userStore.removePersonalPostById(postId);
+  try {
+    showOptionsDropdown.value = false;
+    await blogService.deletePost(postId);
+    blogStore.removePostById(postId);
+    userStore.removePersonalPostById(postId);
+  } catch (error) {
+    console.error("Failed to delete post", error);
+  }
 };
 
-const handleReport = (postId) => {
-  console.log(`Report post with id ${postId}`);
-  showOptionsDropdown.value = false;
-  // Additional report logic would go here
+const handleReport = async (postId) => {
+  try {
+    console.log(`Report post with id ${postId}`);
+    showOptionsDropdown.value = false;
+    await blogService.reportPost(postId);
+  } catch (error) {
+    console.error("Failed to report post", error);
+  }
 };
 
 onMounted(async () => {
@@ -265,8 +331,9 @@ onMounted(async () => {
   if (contentRef.value && contentRef.value.scrollHeight > 320) {
     contentTooLong.value = true;
   }
-
-  // Add global click event listener to detect clicks outside the dropdown
+  if (props.post.author?.id) {
+    await refreshPost();
+  }
   document.addEventListener("click", handleClickOutside);
 });
 

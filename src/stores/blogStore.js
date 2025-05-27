@@ -20,6 +20,17 @@ export const useBlogStore = defineStore("blog", {
   }),
 
   actions: {
+    reset() {
+      this.isLoading = false;
+      this.publicPosts = [];
+      this.hiddenPosts = [];
+      this.error = null;
+      this.currentPage = 0;
+      this.pageSize = 10;
+      this.sortBy = "createdAt,desc";
+      this.hasMorePosts = true;
+      this.searchQuery = "";
+    },
     parseSearchQuery() {
       const filter = {
         title: "",

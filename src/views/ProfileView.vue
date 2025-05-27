@@ -210,6 +210,28 @@
             </div>
             <BlogPost v-for="post in savedPosts" :key="post.id" :post="post" />
           </div>
+          <div v-if="activeTab === 'hidden'" class="space-y-6">
+            <div v-if="isLoading" class="flex justify-center py-12">
+              <va-progress-circle indeterminate color="primary" />
+            </div>
+
+            <div
+              v-else-if="hasNoPosts"
+              class="bg-white rounded-xl shadow-md p-8 text-center"
+            >
+              <h3 class="mt-4 text-xl font-medium text-gray-800">
+                No posts hidden yet
+              </h3>
+              <p class="mt-2 text-gray-500">
+                {{
+                  isCurrentUser
+                    ? "Hidden posts will appear here"
+                    : "This user has not hidden any posts yet."
+                }}
+              </p>
+            </div>
+            <BlogPost v-for="post in hiddenPosts" :key="post.id" :post="post" />
+          </div>
         </div>
       </div>
     </div>
@@ -251,6 +273,7 @@ const profileUser = computed(() => userStore.getProfile);
 const tabs = ref([
   { id: "posts", name: "Posts" },
   { id: "saved", name: "Saved" },
+  { id: "hidden", name: "Hidden" },
 ]);
 
 // Computed properties
@@ -259,20 +282,29 @@ const isLoading = computed(() =>
     ? userStore.isPersonalBlogsLoading
     : userStore.isSavedBlogsLoading
 );
-const error = computed(() =>
-  activeTab.value === "posts"
-    ? userStore.getPersonalBlogsError
-    : userStore.getSavedBlogsError
-);
+const error = computed(() => {
+  if (activeTab.value === "posts") {
+    return userStore.getPersonalBlogsError;
+  } else if (activeTab.value === "saved") {
+    return userStore.getSavedBlogsError;
+  } else if (activeTab.value === "hidden") {
+    return userStore.getHiddenBlogsError;
+  }
+});
 const userPosts = computed(() => userStore.getPersonalBlogs);
 const savedPosts = computed(() => userStore.getSavedBlogs);
+const hiddenPosts = computed(() => userStore.getHiddenBlogs);
 const currentUser = computed(() => authStore.getUser);
 const profileUserId = computed(() => profileUser.value?.id);
-const hasNoPosts = computed(() =>
-  activeTab.value === "posts"
-    ? userPosts.value.length === 0
-    : savedPosts.value.length === 0
-);
+const hasNoPosts = computed(() => {
+  if (activeTab.value === "posts") {
+    return userPosts.value.length === 0;
+  } else if (activeTab.value === "saved") {
+    return savedPosts.value.length === 0;
+  } else if (activeTab.value === "hidden") {
+    return hiddenPosts.value.length === 0;
+  }
+});
 const isCurrentUser = computed(() => {
   return (
     currentUser.value?.id &&
@@ -322,11 +354,6 @@ const fetchProfileUser = async () => {
     // Fetch posts for this user using the userStore with username
     if (profileUser.value?.username) {
       await userStore.fetchPersonalBlogs();
-
-      // Only fetch saved blogs if viewing own profile
-      if (isCurrentUser.value) {
-        await userStore.fetchSavedBlogs();
-      }
     }
   } catch (error) {
     console.error("Failed to fetch profile user", error);
@@ -340,13 +367,17 @@ const fetchRelationshipStatus = async () => {
 // Handle tab changes
 const handleTabChange = async (tabId) => {
   activeTab.value = tabId;
-
-  if (
-    tabId === "saved" &&
+  console.log("Active tab changed to:", tabId);
+  if (tabId === "saved" && savedPosts.value.length === 0) {
+    await userStore.fetchSavedBlogs();
+  } else if (
+    tabId === "hidden" &&
     isCurrentUser.value &&
-    savedPosts.value.length === 0
+    hiddenPosts.value.length === 0
   ) {
-    //await userStore.fetchSavedBlogs();
+    await userStore.fetchHiddenBlogs();
+  } else if (tabId === "posts" && userPosts.value.length === 0) {
+    await userStore.fetchPersonalBlogs();
   }
 };
 

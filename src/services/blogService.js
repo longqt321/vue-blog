@@ -111,4 +111,23 @@ export default {
       throw error;
     }
   },
+
+  async hidePost(postId) {
+    try {
+      const response = await api.post(`/blogs/${postId}/hide`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR HIDE POST", error);
+      throw error;
+    }
+  },
+  async unhidePost(postId) {
+    try {
+      const response = await api.post(`/blogs/${postId}/unhide`);
+      return response.data;
+    } catch (error) {
+      console.error("ERROR UNHIDE POST", error);
+      throw error;
+    }
+  },
 };

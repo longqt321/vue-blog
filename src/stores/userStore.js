@@ -19,6 +19,7 @@ export const useUserStore = defineStore("user", {
     data: {
       personalBlogs: [],
       savedBlogs: [],
+      hiddenBlogs: [],
       suggestedUsers: [],
     },
     currentPage: {
@@ -28,9 +29,10 @@ export const useUserStore = defineStore("user", {
       suggestedUsers: false,
     },
     loading: {
-      loading: false,
       personalBlogs: false,
       savedBlogs: false,
+      hiddenBlogs: false,
+      profile: false,
       suggestedUsers: false,
     },
     error: {
@@ -38,10 +40,41 @@ export const useUserStore = defineStore("user", {
       profile: null,
       personalBlogs: null,
       savedBlogs: null,
+      hiddenBlogs: null,
     },
   }),
 
   actions: {
+    reset() {
+      this.profile = {
+        id: null,
+        fullName: "",
+        username: "",
+        avatar: null,
+        description: "",
+        createdAt: null,
+        followersCount: 0,
+        followingCount: 0,
+        postCount: 0,
+      };
+      this.data.personalBlogs = [];
+      this.data.savedBlogs = [];
+      this.data.suggestedUsers = [];
+      this.currentPage.suggestedUsers = 0;
+      this.moreDataAvailable.suggestedUsers = false;
+      this.loading = {
+        loading: false,
+        personalBlogs: false,
+        savedBlogs: false,
+        suggestedUsers: false,
+      };
+      this.error = {
+        suggestedUsers: null,
+        profile: null,
+        personalBlogs: null,
+        savedBlogs: null,
+      };
+    },
     async fetchProfile(id) {
       this.loading.profile = true;
       this.error.profile = null;
@@ -125,6 +158,27 @@ export const useUserStore = defineStore("user", {
         this.loading.savedBlogs = false;
       }
     },
+    async fetchHiddenBlogs() {
+      this.loading.hiddenBlogs = true;
+      this.error.hiddenBlogs = null;
+      try {
+        const response = await blogService.getPosts({
+          userId: this.profile.id,
+          relationshipType: "HIDDEN",
+        });
+        if (!response.success) {
+          this.error.hiddenBlogs =
+            response.message || "Failed to load hidden blogs.";
+          return;
+        }
+
+        this.data.hiddenBlogs = response.data.content;
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.loading.hiddenBlogs = false;
+      }
+    },
     async fetchSuggestedUsers(page = 0) {
       this.loading.suggestedUsers = true;
       this.error.suggestedUsers = null;
@@ -181,6 +235,11 @@ export const useUserStore = defineStore("user", {
         (p) => p.id !== postId
       );
     },
+    removeHiddenPostById(postId) {
+      this.data.hiddenBlogs = this.data.hiddenBlogs.filter(
+        (p) => p.id !== postId
+      );
+    },
     syncChanges(postId, postData) {
       const personalIndex = this.data.personalBlogs.findIndex(
         (post) => post.id === postId
@@ -196,16 +255,19 @@ export const useUserStore = defineStore("user", {
     getPersonalBlogs: (state) => state.data.personalBlogs,
     getSavedBlogs: (state) => state.data.savedBlogs,
     getSuggestedUsers: (state) => state.data.suggestedUsers,
+    getHiddenBlogs: (state) => state.data.hiddenBlogs,
     isProfileLoading: (state) => state.loading.profile,
     isPersonalBlogsLoading: (state) => state.loading.personalBlogs,
     isSavedBlogsLoading: (state) => state.loading.savedBlogs,
     isSuggestedUsersLoading: (state) => state.loading.suggestedUsers,
+    isHiddenBlogsLoading: (state) => state.loading.hiddenBlogs,
     moreSuggestedUsersAvailable: (state) =>
       state.moreDataAvailable.suggestedUsers,
     getProfileError: (state) => state.error.profile,
     getPersonalBlogsError: (state) => state.error.personalBlogs,
     getSavedBlogsError: (state) => state.error.savedBlogs,
     getSuggestedUsersError: (state) => state.error.suggestedUsers,
+    getHiddenBlogsError: (state) => state.error.hiddenBlogs,
     getSuggestedUsersCurrentPage: (state) => state.currentPage.suggestedUsers,
   },
 });

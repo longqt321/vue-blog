@@ -26,7 +26,7 @@
           class="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
         >
           <va-icon name="visibility_off" color="#3B82F6" class="mr-3" />
-          <span>Ẩn bài viết</span>
+          <span>{{ isHidden ? "Bỏ ẩn bài viết" : "Ẩn bài viết" }}</span>
         </button>
 
         <button
@@ -42,8 +42,22 @@
           class="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
         >
           <va-icon name="person_off" color="#3B82F6" class="mr-3" />
-          <span>Chặn người dùng này</span>
+          <span>{{
+            isBlockingOwner ? "Bỏ chặn người dùng" : "Chặn người dùng"
+          }}</span>
         </button>
+
+        <button
+          v-if="!isBlockingOwner"
+          @click="handleFollowUser"
+          class="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
+        >
+          <va-icon name="person_add" color="#3B82F6" class="mr-3" />
+          <span>{{
+            isFollowingOwner ? "Bỏ theo dõi người dùng" : "Theo dõi người dùng"
+          }}</span>
+        </button>
+
         <button
           @click="handleReport"
           class="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center text-red-600 transition-colors duration-200"
@@ -87,6 +101,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isHidden: {
+    type: Boolean,
+    default: false,
+  },
+  isBlockingOwner: {
+    type: Boolean,
+    default: false,
+  },
+  isFollowingOwner: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits([
@@ -94,6 +120,7 @@ const emit = defineEmits([
   "hide-post",
   "save-post",
   "block-user",
+  "follow-user",
   "delete-post",
   "report",
 ]);
@@ -112,6 +139,10 @@ const handleSavePost = () => {
 
 const handleBlockUser = () => {
   emit("block-user", props.post.author.id);
+};
+
+const handleFollowUser = () => {
+  emit("follow-user", props.post.author.id);
 };
 
 const handleDeletePost = () => {

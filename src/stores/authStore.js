@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import authService from "@/services/authService";
 import router from "@/router";
 import { normalizeUser } from "@/composables/userFormater";
+import { useUserStore } from "./userStore";
+import { useBlogStore } from "./blogStore";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -21,11 +23,16 @@ export const useAuthStore = defineStore("auth", {
     },
 
     logout() {
+      const userStore = useUserStore();
+      const blogStore = useBlogStore();
+
       this.accessToken = null;
       this.user = null;
       this.isAuthenticated = false;
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
+      userStore.reset();
+      blogStore.reset();
     },
 
     enableSkipAuth() {
