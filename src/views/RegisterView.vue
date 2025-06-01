@@ -96,6 +96,36 @@
             prepend-inner-icon="person"
           />
         </div>
+        <!-- OTP Field -->
+        <div class="flex items-end gap-2">
+          <div class="flex-1">
+            <label
+              for="otp"
+              class="block text-sm font-medium text-blue-800 mb-1"
+            >
+              Mã xác thực OTP <span class="text-red-500">*</span>
+            </label>
+            <va-input
+              id="otp"
+              v-model="formData.otp"
+              placeholder="Nhập mã OTP"
+              class="w-full"
+              color="primary"
+              :error="!!errors.otp"
+              :error-messages="errors.otp"
+              prepend-inner-icon="verified_user"
+            />
+          </div>
+          <va-button
+            type="button"
+            color="primary"
+            class="mb-1"
+            @click="handleSendOtp"
+            :loading="isSendingOtp"
+          >
+            Gửi lại mã OTP
+          </va-button>
+        </div>
 
         <!-- Password Field -->
         <div>
@@ -207,15 +237,16 @@ const formData = ref({
   lastName: "",
   username: "",
   email: "",
+  otp: "",
   password: "",
   confirmPassword: "",
   agreeToTerms: false,
 });
 
 // Validation
-const errors = ref({});
 const errorMessage = ref("");
 const isLoading = ref(false);
+const isSendingOtp = ref(false);
 
 const validateForm = () => {
   errors.value = {};
@@ -247,6 +278,8 @@ const validateForm = () => {
     errors.value.password = "Mật khẩu không được để trống";
   } else if (formData.value.password.length < 6) {
     errors.value.password = "Mật khẩu phải có ít nhất 6 ký tự";
+  } else if (!formData.value.otp.length) {
+    errors.value.otp = "Vui lòng nhập mã OTP";
   }
 
   if (!formData.value.confirmPassword) {
@@ -276,19 +309,39 @@ const handleRegister = async () => {
       username: formData.value.username,
       email: formData.value.email,
       password: formData.value.password,
+      confirmPassword: formData.value.confirmPassword,
+      otpCode: formData.value.otp,
     };
 
-    const response = await authService.register(userData);
+    await authService.register(userData);
     router.push("/login");
   } catch (error) {
     console.error("Registration error:", error);
-    if (error.response && error.response.status === 409) {
-      errorMessage.value = "Tên đăng nhập hoặc email đã tồn tại";
-    } else {
-      errorMessage.value = "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.";
+    if (error.response) {
+      errorMessage.value = error.response.data?.message;
     }
   } finally {
     isLoading.value = false;
+  }
+};
+
+const handleSendOtp = async () => {
+  if (!formData.value.email || !formData.value.username) {
+    errors.value.otp =
+      "Vui lòng nhập email và tên đăng nhập trước khi nhận mã OTP";
+    return;
+  }
+  isSendingOtp.value = true;
+  errors.value.otp = "";
+  try {
+    await authService.confirmEmail({
+      username: formData.value.username,
+      email: formData.value.email,
+    });
+  } catch (error) {
+    errorMessage.value = error.response.data?.message;
+  } finally {
+    isSendingOtp.value = false;
   }
 };
 </script>
