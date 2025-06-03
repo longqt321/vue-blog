@@ -77,7 +77,7 @@ const handleTagClick = (tag) => {
     <div class="p-4 border-b border-blue-50">
       <SearchBar
         v-model="searchQuery"
-        placeholder="Search posts, hashtags, users..."
+        placeholder="Tìm kiếm bài viết, hashtag, người dùng..."
       />
     </div>
 

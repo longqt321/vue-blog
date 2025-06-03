@@ -342,16 +342,16 @@ defineExpose({
                   <div
                     class="p-3 bg-gray-100 text-xs font-mono text-gray-600 border-b flex justify-between items-center"
                   >
-                    <span>💻 Code Markdown</span>
+                    <span>💻 Mã Markdown</span>
                     <va-button
                       size="small"
                       color="primary"
                       icon="content_copy"
                       @click="copyToClipboard(section.code)"
                       class="text-xs"
-                      title="Copy code"
+                      title="Sao chép mã"
                     >
-                      Copy
+                      Sao chép
                     </va-button>
                   </div>
                   <div class="p-4">
@@ -407,16 +407,16 @@ defineExpose({
                   <div
                     class="p-3 bg-gray-100 text-xs font-mono text-gray-600 border-b flex justify-between items-center"
                   >
-                    <span>💻 Code MathJax</span>
+                    <span>💻 Mã MathJax</span>
                     <va-button
                       size="small"
                       color="primary"
                       icon="content_copy"
                       @click="copyToClipboard(section.code)"
                       class="text-xs"
-                      title="Copy code"
+                      title="Sao chép mã"
                     >
-                      Copy
+                      Sao chép
                     </va-button>
                   </div>
                   <div class="p-4">

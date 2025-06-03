@@ -49,7 +49,7 @@ watch(
       v-if="isAuthenticated"
     >
       <div class="p-5">
-        <h2 class="text-xl font-bold text-blue-800 mb-4">Create New Post</h2>
+        <h2 class="text-xl font-bold text-blue-800 mb-4">Tạo bài viết mới</h2>
         <CreatePostArea />
       </div>
     </div>
@@ -57,7 +57,7 @@ watch(
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-8">
       <va-progress-circle indeterminate color="primary" />
-      <span class="ml-3 text-blue-700 font-medium">Loading posts...</span>
+      <span class="ml-3 text-blue-700 font-medium">Đang tải bài viết...</span>
     </div>
 
     <!-- Error State -->
@@ -66,16 +66,14 @@ watch(
       class="bg-white rounded-xl shadow-sm p-6 text-center"
     >
       <va-icon name="error_outline" size="large" color="#EF4444" />
-      <h3 class="mt-4 text-lg font-medium text-gray-800">
-        Something went wrong
-      </h3>
+      <h3 class="mt-4 text-lg font-medium text-gray-800">Có lỗi xảy ra</h3>
       <p class="mt-2 text-gray-600">{{ error }}</p>
       <va-button
         color="primary"
         class="mt-4"
         @click="blogStore.fetchPublicPosts()"
       >
-        Try Again
+        Thử lại
       </va-button>
     </div>
 
@@ -84,9 +82,11 @@ watch(
       v-else-if="posts.length === 0"
       class="bg-white rounded-xl shadow-sm p-8 text-center"
     >
-      <h3 class="mt-4 text-lg font-medium text-gray-800">No posts yet</h3>
+      <h3 class="mt-4 text-lg font-medium text-gray-800">
+        Chưa có bài viết nào
+      </h3>
       <p class="mt-2 text-gray-600">
-        Be the first to share your thoughts with the community!
+        Hãy là người đầu tiên chia sẻ suy nghĩ của bạn với cộng đồng!
       </p>
     </div>
 

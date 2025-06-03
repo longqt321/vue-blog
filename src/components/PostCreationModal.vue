@@ -205,7 +205,7 @@ const removeHashtag = (index) => {
 
 const submitPost = async () => {
   if (!isFormValid.value) {
-    error.value = "Please fill in both title and content fields.";
+    error.value = "Vui lòng điền đầy đủ tiêu đề và nội dung bài viết.";
     return;
   }
 
@@ -234,7 +234,7 @@ const submitPost = async () => {
     modalStore.closeModal();
   } catch (err) {
     console.error("ERROR PROCESSING POST", err);
-    error.value = "There was a problem saving your post. Please try again.";
+    error.value = "Có lỗi xảy ra khi lưu bài viết. Vui lòng thử lại.";
   } finally {
     isLoading.value = false;
   }
@@ -316,7 +316,7 @@ onUnmounted(() => {
           <!-- Spacer -->
           <div class="flex flex-col items-center">
             <h3 class="text-3xl font-bold text-blue-800 text-center">
-              {{ isEditMode ? "Edit Post" : "Create New Post" }}
+              {{ isEditMode ? "Chỉnh sửa bài viết" : "Tạo bài viết mới" }}
             </h3>
             <!-- Draft indicator -->
             <div
@@ -332,11 +332,11 @@ onUnmounted(() => {
                 <span
                   :class="isDraftSaved ? 'text-green-600' : 'text-orange-600'"
                 >
-                  {{ isDraftSaved ? "Draft saved" : "Draft not saved" }}
+                  {{ isDraftSaved ? "Bản nháp đã lưu" : "Bản nháp chưa lưu" }}
                 </span>
               </div>
               <span v-if="formattedDraftTime" class="text-gray-500">
-                at {{ formattedDraftTime }}
+                lúc {{ formattedDraftTime }}
               </span>
             </div>
           </div>
@@ -355,7 +355,7 @@ onUnmounted(() => {
           <input
             v-model="title"
             type="text"
-            placeholder="Enter post title here..."
+            placeholder="Nhập tiêu đề bài viết..."
             class="w-full px-4 py-3 text-lg border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition duration-200 text-center font-medium"
           />
         </div>
@@ -384,7 +384,7 @@ onUnmounted(() => {
               value="PUBLIC"
               class="text-blue-600 focus:ring-blue-500 cursor-pointer"
             />
-            <span class="text-gray-700">Public</span>
+            <span class="text-gray-700">Công khai</span>
           </label>
 
           <label class="flex items-center gap-2 cursor-pointer">
@@ -394,7 +394,7 @@ onUnmounted(() => {
               value="PRIVATE"
               class="text-blue-600 focus:ring-blue-500 cursor-pointer"
             />
-            <span class="text-gray-700">Private</span>
+            <span class="text-gray-700">Riêng tư</span>
           </label>
         </div>
 
@@ -405,7 +405,7 @@ onUnmounted(() => {
               v-model="hashtagInput"
               @keyup.enter="addHashtag"
               type="text"
-              placeholder="Add a hashtag and press Enter..."
+              placeholder="Thêm hashtag và nhấn Enter..."
               class="w-full px-3 py-2 text-sm border-b-2 border-blue-200 focus:border-blue-500 outline-none pr-8"
             />
             <button
@@ -433,9 +433,8 @@ onUnmounted(() => {
             ×
           </button>
         </div>
-
         <div v-if="hashtags.length === 0" class="text-gray-400 text-sm italic">
-          No hashtags added yet
+          Chưa có hashtag nào
         </div>
       </div>
       <!-- Footer -->
@@ -443,7 +442,7 @@ onUnmounted(() => {
         class="mt-6 border-t border-blue-100 flex justify-between items-center pt-4 flex-shrink-0"
       >
         <va-button outlined color="primary" class="px-4" @click="confirmExit">
-          Cancel
+          Hủy
         </va-button>
         <div class="flex gap-3">
           <va-button
@@ -454,7 +453,7 @@ onUnmounted(() => {
             @click="saveDraft"
             :disabled="!hasUnsavedChanges"
           >
-            Save Draft
+            Lưu bản nháp
           </va-button>
           <va-button
             @click="submitPost"
@@ -464,7 +463,7 @@ onUnmounted(() => {
             :loading="isLoading"
             :disabled="!isFormValid"
           >
-            {{ isEditMode ? "Update" : "Post" }}
+            {{ isEditMode ? "Cập nhật" : "Đăng bài" }}
           </va-button>
         </div>
       </div>
@@ -483,20 +482,21 @@ onUnmounted(() => {
     <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
       <div class="flex items-center gap-3 mb-4">
         <va-icon name="warning" color="warning" size="large" />
-        <h3 class="text-lg font-semibold text-gray-900">Unsaved Changes</h3>
+        <h3 class="text-lg font-semibold text-gray-900">
+          Có thay đổi chưa lưu
+        </h3>
       </div>
-
       <p class="text-gray-600 mb-6">
-        You have unsaved changes. What would you like to do?
+        Bạn có thay đổi chưa được lưu. Bạn muốn làm gì?
       </p>
 
       <div class="flex flex-col gap-3">
         <va-button @click="saveAndClose" color="success" class="w-full">
-          Save Draft & Exit
+          Lưu bản nháp & Thoát
         </va-button>
 
         <va-button @click="forceClose" color="danger" outlined class="w-full">
-          Exit Without Saving
+          Thoát không lưu
         </va-button>
 
         <va-button
@@ -505,7 +505,7 @@ onUnmounted(() => {
           color="primary"
           class="w-full"
         >
-          Continue Editing
+          Tiếp tục chỉnh sửa
         </va-button>
       </div>
     </div>

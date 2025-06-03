@@ -41,13 +41,13 @@ onMounted(async () => {
     <div class="p-4 border-b border-blue-50">
       <SearchBar
         v-model="userSearch"
-        placeholder="Search users by name or username..."
+        placeholder="Tìm kiếm người dùng theo tên hoặc tên đăng nhập..."
       />
     </div>
 
     <!-- Online Friends Section -->
     <div class="p-4 border-b border-blue-50">
-      <h3 class="font-medium text-blue-800 mb-3">Popular users</h3>
+      <h3 class="font-medium text-blue-800 mb-3">Người dùng phổ biến</h3>
       <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
         <!-- Loading State -->
         <VaInfiniteScroll
