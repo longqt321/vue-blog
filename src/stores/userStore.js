@@ -89,7 +89,7 @@ export const useUserStore = defineStore("user", {
           lastName: data.lastName,
           fullName: `${data.lastName} ${data.firstName}`,
           username: data.username,
-          avatar: data.avatarUrl,
+          avatar: data.avatarId,
           description: data.description || "",
           createdAt: data.createdAt,
           followersCount: data.followersCount || 0,

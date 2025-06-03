@@ -3,6 +3,7 @@ import Friend from "./Friend.vue";
 import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/stores/userStore";
 import userService from "@/services/userService";
+import SearchBar from "./SearchBar.vue";
 
 const userStore = useUserStore();
 const userSearch = ref("");
@@ -36,21 +37,12 @@ onMounted(async () => {
     <div class="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
       <h2 class="text-lg font-bold">Famous users</h2>
     </div>
-
     <!-- Search Friends Section -->
     <div class="p-4 border-b border-blue-50">
-      <div class="relative">
-        <input
-          v-model="userSearch"
-          type="text"
-          placeholder="Search users..."
-          class="w-full px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-        <va-icon
-          name="search"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400"
-        />
-      </div>
+      <SearchBar
+        v-model="userSearch"
+        placeholder="Search users by name or username..."
+      />
     </div>
 
     <!-- Online Friends Section -->

@@ -6,6 +6,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  placeholder: {
+    type: String,
+    default: "Search...",
+  },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -32,7 +36,7 @@ const updateValue = (event) => {
         @input="updateValue"
         class="flex-grow px-4 py-2 bg-transparent text-blue-900 placeholder-blue-400 focus:outline-none"
         type="text"
-        placeholder="Search posts, people, hashtags..."
+        :placeholder="placeholder"
       />
       <button
         class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white hover:bg-blue-600 transition duration-200"

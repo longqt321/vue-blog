@@ -1,20 +1,15 @@
 import api from "./api";
 
 export default {
-  /**
-   * Get image blob URL from backend using avatar URL
-   * @param {string} avatarUrl - The avatar URL from user object
-   * @returns {string} - The blob URL to display the image
-   */
-  async getImageUrl(avatarUrl) {
+  async getImageUrl(avatarId) {
     try {
-      if (!avatarUrl) {
+      if (!avatarId) {
         throw new Error("No avatar URL provided");
       }
 
       const response = await api.get(`/images/`, {
         params: {
-          url: avatarUrl,
+          imageId: avatarId,
         },
         responseType: "blob",
         timeout: 10000, // Thêm timeout
@@ -52,6 +47,60 @@ export default {
       throw error;
     }
   },
+  /**
+   * Upload avatar image to backend
+   * @param {File} file - The image file to upload
+   * @returns {string} - The image ID returned from backend
+   */
+  async uploadAvatar(file) {
+    try {
+      if (!file) {
+        throw new Error("No file provided");
+      } // Kiểm tra file type
+      console.log(file.type);
+      if (!file.type || !file.type.startsWith("image/")) {
+        // Fallback: check file extension if type is not available
+        const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+        const fileName = file.name ? file.name.toLowerCase() : "";
+        const hasValidExtension = allowedExtensions.some((ext) =>
+          fileName.endsWith(ext)
+        );
+
+        if (!hasValidExtension) {
+          throw new Error("File must be an image (jpg, jpeg, png, gif, webp)");
+        }
+      }
+
+      // Kiểm tra file size (ví dụ: tối đa 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new Error("File size must be less than 5MB");
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post("/images/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000, // 30s timeout cho upload
+      });
+
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.message || "Upload failed");
+      }
+
+      return response.data.data; // Trả về image ID
+    } catch (error) {
+      console.error("ERROR UPLOADING IMAGE:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+      }
+      throw error;
+    }
+  },
 
   /**
    * Clean up blob URLs to prevent memory leaks
@@ -60,43 +109,6 @@ export default {
   revokeImageUrl(blobUrl) {
     if (blobUrl && blobUrl.startsWith("blob:")) {
       URL.revokeObjectURL(blobUrl);
-    }
-  },
-  /**
-   * Mock function for testing - simulates loading an image from absolute path
-   * Remove this in production when real backend endpoint is ready
-   */
-  async getMockImageUrl(avatarUrl) {
-    try {
-      // Simulate network delay
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 1000 + 500)
-      );
-
-      // Simulate different scenarios based on avatarUrl
-      if (!avatarUrl) {
-        throw new Error("No avatar URL provided");
-      }
-
-      // Simulate some URLs failing
-      if (avatarUrl.includes("fail")) {
-        throw new Error("Simulated network error");
-      }
-
-      // For testing, return different images based on URL patterns
-      if (avatarUrl.includes("admin")) {
-        return "/src/assets/avatar.jpg";
-      }
-
-      if (avatarUrl.includes("user")) {
-        return "/src/assets/default-avatar.jpg";
-      }
-
-      // Default fallback
-      return "/src/assets/default-avatar.jpg";
-    } catch (error) {
-      console.error("Mock image loading failed:", error);
-      throw error;
     }
   },
 };

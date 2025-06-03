@@ -18,7 +18,7 @@
                 class="w-32 h-32 rounded-full border-4 border-blue-100 overflow-hidden bg-white mb-4"
               >
                 <DynamicImage
-                  :avatar-url="profileUser.avatar"
+                  :imageId="profileUser.avatar"
                   alt="Profile picture"
                   container-class="w-full h-full"
                   image-class="w-full h-full object-cover"

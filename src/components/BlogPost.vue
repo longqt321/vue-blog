@@ -9,7 +9,7 @@
           class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-100 flex-shrink-0"
         >
           <DynamicImage
-            :avatar-url="post.author?.avatar"
+            :imageId="post.author?.avatarId"
             :alt="`${post.author?.firstName} ${post.author?.lastName} avatar`"
             container-class="w-full h-full"
             image-class="w-full h-full object-cover"

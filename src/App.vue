@@ -55,6 +55,10 @@ html {
   overflow-y: scroll;
 }
 
+html.dark {
+  scrollbar-color: #4b5563 #1f2937; /* Gray-600 on Gray-900 */
+}
+
 /* Transitions */
 .page-enter-active,
 .page-leave-active {

@@ -4,7 +4,7 @@
     <div class="flex items-center p-4 border-b border-blue-100">
       <div class="relative w-14 h-14">
         <DynamicImage
-          :avatar-url="authStore.getUser.avatar"
+          :imageId="authStore.getUser.avatarId"
           alt="Profile picture"
           container-class="w-full h-full rounded-full border-2 border-blue-200 overflow-hidden"
           image-class="w-full h-full object-cover"

@@ -19,6 +19,8 @@
 
         <!-- Right side: User controls -->
         <div class="flex items-center space-x-4">
+          <!-- Theme Toggle -->
+          <ThemeToggle />
           <!-- Notification Bell -->
           <div class="relative">
             <button
@@ -52,11 +54,19 @@
               @click="toggleAvatarDropdown"
               class="flex items-center hover:bg-blue-600 rounded-md space-x-2 focus:outline-none"
             >
-              <img
-                src="../assets/default-avatar.jpg"
-                class="w-10 h-10 rounded-full border-2 border-white"
-                alt="User avatar"
-              />
+              <div
+                class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-100 flex-shrink-0 mr-2"
+              >
+                <DynamicImage
+                  :imageId="authStore.getUser.avatarId"
+                  :alt="avatar"
+                  container-class="w-full h-full"
+                  image-class="w-full h-full object-cover"
+                  loading-size="20px"
+                  placeholder-icon-size="medium"
+                  error-icon-size="medium"
+                />
+              </div>
               <span class="hidden md:block font-medium">Profile</span>
               <va-icon
                 name="expand_more"
@@ -85,10 +95,13 @@ import { useBlogStore } from "@/stores/blogStore";
 import NotificationContent from "./NotificationContent.vue";
 import BaseDropdown from "./BaseDropdown.vue";
 import AvatarDropdownContent from "./AvatarDropdownContent.vue";
+import { useAuthStore } from "@/stores/authStore";
+import DynamicImage from "./DynamicImage.vue";
 
 const router = useRouter();
 const notifStore = useNotifStore();
 const blogStore = useBlogStore();
+const authStore = useAuthStore();
 
 const showNotifDropdown = ref(false);
 const showAvatarDropdown = ref(false);

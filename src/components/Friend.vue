@@ -1,5 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
+import DynamicImage from "./DynamicImage.vue";
 
 const props = defineProps({
   friend: {
@@ -20,11 +21,17 @@ const goToProfile = () => {
     class="friend-item flex items-center p-3 my-2 rounded-lg transition duration-200 cursor-pointer"
     @click="goToProfile"
   >
-    <div class="relative w-12 h-12 flex-shrink-0 mr-3">
-      <img
-        class="rounded-full w-full h-full object-cover border-2 border-blue-100"
-        :src="friend.avatar"
-        alt="Avatar"
+    <div
+      class="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-100 flex-shrink-0 mr-2"
+    >
+      <DynamicImage
+        :imageId="friend.avatarId"
+        :alt="avatar"
+        container-class="w-full h-full"
+        image-class="w-full h-full object-cover"
+        loading-size="20px"
+        placeholder-icon-size="medium"
+        error-icon-size="medium"
       />
     </div>
     <div class="flex-grow">

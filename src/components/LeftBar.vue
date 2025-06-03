@@ -31,6 +31,11 @@ const debouncedSearch = debounce(performSearch, 500);
 watch(searchQuery, (newVal) => {
   debouncedSearch(newVal);
 });
+
+const handleTagClick = (tag) => {
+  searchQuery.value = `#${tag}`;
+  performSearch(searchQuery.value);
+};
 </script>
 
 <template>
@@ -68,25 +73,25 @@ watch(searchQuery, (newVal) => {
         </span>
       </h2>
     </div>
-
     <!-- Search Section -->
     <div class="p-4 border-b border-blue-50">
-      <div class="relative">
-        <SearchBar v-model="searchQuery" />
-      </div>
+      <SearchBar
+        v-model="searchQuery"
+        placeholder="Search posts, hashtags, users..."
+      />
     </div>
 
     <!-- Filter Section -->
     <div class="p-4 border-b border-blue-50">
       <h3 class="font-medium text-blue-800 mb-3">Popular Tags</h3>
-      <div class="flex flex-wrap gap-2">
-        <va-chip
+      <div class="flex flex-wrap gap-2">        <va-chip
           v-for="tag in popularTags"
           :key="tag"
           size="small"
           color="primary"
           outlined
-          class="cursor-pointer"
+          class="cursor-pointer hover:bg-blue-50 transition-colors duration-200"
+          @click="handleTagClick(tag)"
         >
           #{{ tag }}
         </va-chip>

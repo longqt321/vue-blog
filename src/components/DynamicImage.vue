@@ -32,7 +32,7 @@ import { useAvatarLoader } from "@/composables/useImageLoader";
 
 const props = defineProps({
   // Avatar URL from backend
-  avatarUrl: {
+  imageId: {
     type: String,
     default: "",
   },
@@ -84,7 +84,7 @@ const emit = defineEmits(["error"]);
 
 // Use the avatar loader composable
 const { imageUrl, loading, error } = useAvatarLoader(
-  computed(() => props.avatarUrl)
+  computed(() => props.imageId)
 );
 
 const onImageError = (event) => {

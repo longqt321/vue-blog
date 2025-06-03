@@ -1,19 +1,14 @@
 import { ref, onUnmounted, watch } from "vue";
 import imageService from "@/services/imageService";
 
-/**
- * Composable for handling avatar images from absolute paths
- * @param {string|ref} avatarUrl - The avatar URL (can be reactive)
- * @returns {Object} - Object containing imageUrl, loading, error states and methods
- */
 export function useAvatarLoader(avatarUrl) {
   const imageUrl = ref(null);
   const loading = ref(false);
   const error = ref(null);
   const blobUrl = ref(null);
 
-  const loadImage = async (url) => {
-    if (!url) {
+  const loadImage = async (imageId) => {
+    if (!imageId) {
       imageUrl.value = null;
       error.value = null;
       return;
@@ -27,16 +22,13 @@ export function useAvatarLoader(avatarUrl) {
       if (blobUrl.value) {
         imageService.revokeImageUrl(blobUrl.value);
         blobUrl.value = null;
-      } // For development/testing - use mock function
-      // In production, replace with: await imageService.getImageUrl(url);
-      const newBlobUrl = await imageService.getImageUrl(url);
+      }
+      const newBlobUrl = await imageService.getImageUrl(imageId);
       blobUrl.value = newBlobUrl;
       imageUrl.value = newBlobUrl;
     } catch (err) {
       error.value = err;
       imageUrl.value = null;
-      // Set fallback to default avatar
-      imageUrl.value = "/src/assets/default-avatar.jpg";
       console.error("Failed to load avatar:", err);
     } finally {
       loading.value = false;
