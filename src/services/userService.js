@@ -51,7 +51,7 @@ export default {
   // Unfollow a user
   async unfollowUser(userId) {
     try {
-      const response = await api.post(`/users/${userId}/unfollow`);
+      const response = await api.delete(`/users/${userId}/follow`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNFOLLOW USER!!", error);
@@ -73,7 +73,7 @@ export default {
   // Unblock a user
   async unblockUser(userId) {
     try {
-      const response = await api.post(`/users/${userId}/unblock`);
+      const response = await api.delete(`/users/${userId}/block`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNBLOCK USER!!", error);

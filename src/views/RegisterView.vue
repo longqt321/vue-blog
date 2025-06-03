@@ -247,10 +247,9 @@ const formData = ref({
 const errorMessage = ref("");
 const isLoading = ref(false);
 const isSendingOtp = ref(false);
+const errors = ref({});
 
 const validateForm = () => {
-  errors.value = {};
-
   if (!formData.value.firstName) {
     errors.value.firstName = "Tên không được để trống";
   }

@@ -271,9 +271,9 @@ const activeTab = ref("posts");
 const userRelationship = ref(UserRelationship.NONE);
 const profileUser = computed(() => userStore.getProfile);
 const tabs = ref([
-  { id: "posts", name: "Posts" },
-  { id: "saved", name: "Saved" },
-  { id: "hidden", name: "Hidden" },
+  { id: "posts", name: "Cá nhân" },
+  { id: "saved", name: "Đã lưu" },
+  { id: "hidden", name: "Đã ẩn" },
 ]);
 
 // Computed properties

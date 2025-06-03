@@ -40,10 +40,16 @@ export const useBlogStore = defineStore("blog", {
       };
       const addToFilter = (token) => {
         const trimmed = trim(token);
-        filter.hashtags.push(trimmed.substring(1));
-        filter.username = trimmed.substring(1);
-        filter.author = trimmed.substring(1);
-        filter.title = trimmed;
+        if (!trimmed) return;
+        if (trimmed.startsWith('#')) {
+          filter.hashtags.push(trimmed.substring(1));
+        } else if (trimmed.startsWith('@')) {
+          filter.username = trimmed.substring(1);
+        } else if (trimmed.startsWith('!')) {
+          filter.author = trimmed.substring(1);
+        } else {
+          filter.title = trimmed;
+        }
       };
       if (!this.searchQuery) return filter;
       const tokens = this.searchQuery.split(",");
