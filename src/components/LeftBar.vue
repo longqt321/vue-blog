@@ -84,7 +84,8 @@ const handleTagClick = (tag) => {
     <!-- Filter Section -->
     <div class="p-4 border-b border-blue-50">
       <h3 class="font-medium text-blue-800 mb-3">Popular Tags</h3>
-      <div class="flex flex-wrap gap-2">        <va-chip
+      <div class="flex flex-wrap gap-2">
+        <va-chip
           v-for="tag in popularTags"
           :key="tag"
           size="small"

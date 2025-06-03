@@ -25,6 +25,11 @@ watch(
 const updateValue = (event) => {
   emit("update:modelValue", event.target.value);
 };
+
+const clearSearch = () => {
+  searchText.value = "";
+  emit("update:modelValue", "");
+};
 </script>
 <template>
   <div class="relative">
@@ -38,8 +43,19 @@ const updateValue = (event) => {
         type="text"
         :placeholder="placeholder"
       />
+      <!-- Clear button - chỉ hiển thị khi có text -->
+      <button
+        v-if="searchText"
+        @click="clearSearch"
+        class="flex items-center justify-center w-10 h-10 text-gray-400 hover:text-gray-600 transition duration-200"
+        type="button"
+      >
+        <va-icon name="close" />
+      </button>
+      <!-- Search button -->
       <button
         class="flex items-center justify-center w-10 h-10 bg-blue-500 text-white hover:bg-blue-600 transition duration-200"
+        type="button"
       >
         <va-icon name="search" />
       </button>
