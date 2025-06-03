@@ -17,10 +17,12 @@
               <div
                 class="w-32 h-32 rounded-full border-4 border-blue-100 overflow-hidden bg-white mb-4"
               >
-                <img
-                  :src="profileUser.avatar"
+                <DynamicImage
+                  :avatar-url="profileUser.avatar"
                   alt="Profile picture"
-                  class="w-full h-full object-cover"
+                  container-class="w-full h-full"
+                  image-class="w-full h-full object-cover"
+                  loading-size="32px"
                 />
               </div>
 
@@ -246,6 +248,7 @@ import { useBlogStore } from "@/stores/blogStore";
 import { useUserStore } from "@/stores/userStore";
 import NavBar from "@/components/NavBar.vue";
 import BlogPost from "@/components/BlogPost.vue";
+import DynamicImage from "@/components/DynamicImage.vue";
 import userService from "@/services/userService";
 import UserEditModal from "@/components/UserEditModal.vue";
 import { formatTime } from "@/composables/timeFormatter";

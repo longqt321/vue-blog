@@ -3,10 +3,14 @@
     <div class="p-6">
       <!-- Avatar section -->
       <div class="flex flex-col items-center mb-8">
-        <img
-          :src="editForm.avatarUrl || defaultAvatar"
+        <DynamicImage
+          :avatar-url="editForm.avatarUrl || defaultAvatar"
           alt="Ảnh đại diện"
-          class="w-32 h-32 rounded-full object-cover border-2 border-gray-200 mb-4 shadow-sm"
+          container-class="w-32 h-32 rounded-full border-2 border-gray-200 mb-4 shadow-sm overflow-hidden"
+          image-class="w-full h-full object-cover"
+          loading-text="Đang tải avatar..."
+          error-text="Lỗi tải avatar"
+          loading-size="24px"
         />
         <va-file-upload
           type="single"
@@ -83,6 +87,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useUserStore } from "@/stores/userStore";
 import { useModalStore } from "@/stores/modalStore";
 import userService from "@/services/userService";
+import DynamicImage from "./DynamicImage.vue";
 
 const userStore = useUserStore();
 const modalStore = useModalStore();

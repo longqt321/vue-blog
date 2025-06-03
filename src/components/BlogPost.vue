@@ -8,10 +8,14 @@
         <div
           class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-100 flex-shrink-0"
         >
-          <img
-            :src="post.author?.avatar || '../assets/avatar.jpg'"
-            class="w-full h-full object-cover"
-            alt="Author avatar"
+          <DynamicImage
+            :avatar-url="post.author?.avatar"
+            :alt="`${post.author?.firstName} ${post.author?.lastName} avatar`"
+            container-class="w-full h-full"
+            image-class="w-full h-full object-cover"
+            loading-size="20px"
+            placeholder-icon-size="medium"
+            error-icon-size="medium"
           />
         </div>
         <div class="ml-3">
@@ -145,6 +149,7 @@ import { formatTime } from "@/composables/timeFormatter";
 import blogService from "@/services/blogService";
 import BaseDropdown from "./BaseDropdown.vue";
 import PostOptionsDropdown from "./PostOptionsDropdown.vue";
+import DynamicImage from "./DynamicImage.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useModalStore } from "@/stores/modalStore";
 import userService from "@/services/userService";
