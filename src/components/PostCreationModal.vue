@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from "vue";
+import { ref, computed, watch, onUnmounted, nextTick } from "vue";
 import { useBlogStore } from "@/stores/blogStore";
 import { MdPreview, MdEditor } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
@@ -21,7 +21,11 @@ const hashtagInput = ref("");
 const hashtags = ref([]);
 const error = ref(null);
 const editingPostId = ref(null);
-const markdownGuideRef = ref(null);
+const isMdGuideOpen = ref(null);
+const showExitConfirmation = ref(false);
+const hasDraft = ref(false);
+const isDraftSaved = ref(false);
+const draftTimestamp = ref(null);
 
 // Computed properties
 const isOpen = computed(() => modalStore.isModalOpen);
@@ -32,6 +36,34 @@ const isFormValid = computed(
     textContent.value.trim() !== "" &&
     selectedVisibility.value.trim() !== ""
 );
+
+const hasUnsavedChanges = computed(() => {
+  if (isEditMode.value) {
+    const post = modalStore.getPostBeingEdited;
+    if (!post) return false;
+
+    return (
+      title.value !== (post.title || "") ||
+      textContent.value !== (post.body || "") ||
+      selectedVisibility.value !== (post.visibility || "PUBLIC") ||
+      JSON.stringify(hashtags.value.sort()) !==
+        JSON.stringify((post.hashtags || []).sort())
+    );
+  }
+
+  // For new posts, check if user has entered any content
+  return (
+    title.value.trim() !== "" ||
+    textContent.value.trim() !== "" ||
+    hashtags.value.length > 0 ||
+    selectedVisibility.value !== "PUBLIC"
+  );
+});
+
+const formattedDraftTime = computed(() => {
+  if (!draftTimestamp.value) return "";
+  return new Date(draftTimestamp.value).toLocaleTimeString();
+});
 
 // Populate form with post data when in edit mode
 watch(
@@ -73,10 +105,90 @@ const getScrollbarWidth = () => {
   return scrollbarWidth;
 };
 
+// Draft saving functionality
+const DRAFT_KEY = "post_draft";
+
+const saveDraft = () => {
+  if (!hasUnsavedChanges.value) return;
+
+  const draft = {
+    title: title.value,
+    textContent: textContent.value,
+    selectedVisibility: selectedVisibility.value,
+    hashtags: hashtags.value,
+    timestamp: Date.now(),
+    isEditMode: isEditMode.value,
+    editingPostId: editingPostId.value,
+  };
+
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  isDraftSaved.value = true;
+  draftTimestamp.value = draft.timestamp;
+  hasDraft.value = true;
+};
+
+const loadDraft = () => {
+  const savedDraft = localStorage.getItem(DRAFT_KEY);
+  if (!savedDraft) return false;
+
+  try {
+    const draft = JSON.parse(savedDraft);
+
+    // Don't load draft if we're in edit mode or if draft is for edit mode but different post
+    if (
+      isEditMode.value ||
+      (draft.isEditMode && draft.editingPostId !== editingPostId.value)
+    ) {
+      return false;
+    }
+
+    title.value = draft.title || "";
+    textContent.value = draft.textContent || "";
+    selectedVisibility.value = draft.selectedVisibility || "PUBLIC";
+    hashtags.value = draft.hashtags || [];
+    draftTimestamp.value = draft.timestamp;
+    hasDraft.value = true;
+    isDraftSaved.value = true;
+
+    return true;
+  } catch (e) {
+    console.error("Error loading draft:", e);
+    clearDraft();
+    return false;
+  }
+};
+
+const clearDraft = () => {
+  localStorage.removeItem(DRAFT_KEY);
+  hasDraft.value = false;
+  isDraftSaved.value = false;
+  draftTimestamp.value = null;
+};
+
+const confirmExit = () => {
+  if (hasUnsavedChanges.value && !isDraftSaved.value) {
+    showExitConfirmation.value = true;
+  } else {
+    closeModal();
+  }
+};
+
+const forceClose = () => {
+  showExitConfirmation.value = false;
+  closeModal();
+};
+
+const saveAndClose = () => {
+  saveDraft();
+  showExitConfirmation.value = false;
+  closeModal();
+};
+
 // Methods
 const closeModal = () => {
   modalStore.closeModal();
   error.value = null;
+  showExitConfirmation.value = false;
 };
 
 const addHashtag = () => {
@@ -116,6 +228,9 @@ const submitPost = async () => {
       // Create new post using blogStore
       await modalStore.createPost(postData);
     }
+
+    // Clear draft on successful submission
+    clearDraft();
     modalStore.closeModal();
   } catch (err) {
     console.error("ERROR PROCESSING POST", err);
@@ -129,15 +244,41 @@ const submitPost = async () => {
 watch(isOpen, (newVal) => {
   if (newVal) {
     disableBodyScroll();
+    // Load draft only for new posts (not edit mode)
+    if (!isEditMode.value) {
+      nextTick(() => {
+        loadDraft();
+      });
+    }
   } else {
     enableBodyScroll();
-    title.value = "";
-    textContent.value = "";
-    selectedVisibility.value = "PUBLIC";
-    hashtags.value = [];
+    if (!isEditMode.value) {
+      title.value = "";
+      textContent.value = "";
+      selectedVisibility.value = "PUBLIC";
+      hashtags.value = [];
+    }
     editingPostId.value = null;
     error.value = null;
+    showExitConfirmation.value = false;
+    isDraftSaved.value = false;
   }
+});
+
+// Auto-save draft when content changes (debounced)
+let draftSaveTimeout;
+const debouncedSaveDraft = () => {
+  clearTimeout(draftSaveTimeout);
+  isDraftSaved.value = false;
+  draftSaveTimeout = setTimeout(() => {
+    if (!isEditMode.value && hasUnsavedChanges.value) {
+      saveDraft();
+    }
+  }, 2000); // Save after 2 seconds of inactivity
+};
+
+watch([title, textContent, selectedVisibility, hashtags], debouncedSaveDraft, {
+  deep: true,
 });
 
 // Cleanup on component unmount
@@ -154,7 +295,7 @@ onUnmounted(() => {
     <!-- Background overlay -->
     <div
       class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-      @click="closeModal"
+      @click="confirmExit"
     ></div>
 
     <!-- Modal panel -->
@@ -173,15 +314,38 @@ onUnmounted(() => {
         <div class="w-full flex justify-between items-center mb-4">
           <div class="w-8"></div>
           <!-- Spacer -->
-          <h3 class="text-3xl font-bold text-blue-800 text-center">
-            {{ isEditMode ? "Edit Post" : "Create New Post" }}
-          </h3>
+          <div class="flex flex-col items-center">
+            <h3 class="text-3xl font-bold text-blue-800 text-center">
+              {{ isEditMode ? "Edit Post" : "Create New Post" }}
+            </h3>
+            <!-- Draft indicator -->
+            <div
+              v-if="hasDraft && !isEditMode"
+              class="mt-2 flex items-center gap-2 text-sm"
+            >
+              <div class="flex items-center gap-1">
+                <va-icon
+                  name="save"
+                  size="small"
+                  :color="isDraftSaved ? 'success' : 'warning'"
+                />
+                <span
+                  :class="isDraftSaved ? 'text-green-600' : 'text-orange-600'"
+                >
+                  {{ isDraftSaved ? "Draft saved" : "Draft not saved" }}
+                </span>
+              </div>
+              <span v-if="formattedDraftTime" class="text-gray-500">
+                at {{ formattedDraftTime }}
+              </span>
+            </div>
+          </div>
           <va-button
             icon="help_outline"
             color="info"
             size="small"
             round
-            @click="markdownGuideRef?.toggleGuide()"
+            @click="isMdGuideOpen?.toggleGuide()"
             class="text-blue-600 hover:bg-blue-50"
             title="Hướng dẫn Markdown & MathJax"
           >
@@ -274,28 +438,79 @@ onUnmounted(() => {
           No hashtags added yet
         </div>
       </div>
-
       <!-- Footer -->
       <div
         class="mt-6 border-t border-blue-100 flex justify-between items-center pt-4 flex-shrink-0"
       >
-        <va-button outlined color="primary" class="px-4" @click="closeModal">
+        <va-button outlined color="primary" class="px-4" @click="confirmExit">
           Cancel
         </va-button>
+        <div class="flex gap-3">
+          <va-button
+            v-if="!isEditMode && hasUnsavedChanges"
+            outlined
+            color="warning"
+            class="px-4"
+            @click="saveDraft"
+            :disabled="!hasUnsavedChanges"
+          >
+            Save Draft
+          </va-button>
+          <va-button
+            @click="submitPost"
+            outlined
+            color="primary"
+            class="px-4"
+            :loading="isLoading"
+            :disabled="!isFormValid"
+          >
+            {{ isEditMode ? "Update" : "Post" }}
+          </va-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exit Confirmation Dialog -->
+  <div
+    v-if="showExitConfirmation"
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+  >
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Dialog panel -->
+    <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <va-icon name="warning" color="warning" size="large" />
+        <h3 class="text-lg font-semibold text-gray-900">Unsaved Changes</h3>
+      </div>
+
+      <p class="text-gray-600 mb-6">
+        You have unsaved changes. What would you like to do?
+      </p>
+
+      <div class="flex flex-col gap-3">
+        <va-button @click="saveAndClose" color="success" class="w-full">
+          Save Draft & Exit
+        </va-button>
+
+        <va-button @click="forceClose" color="danger" outlined class="w-full">
+          Exit Without Saving
+        </va-button>
+
         <va-button
-          @click="submitPost"
+          @click="showExitConfirmation = false"
           outlined
           color="primary"
-          class="px-4"
-          :loading="isLoading"
-          :disabled="!isFormValid"
+          class="w-full"
         >
-          {{ isEditMode ? "Update" : "Post" }}
+          Continue Editing
         </va-button>
       </div>
     </div>
   </div>
 
   <!-- Markdown Guide Component -->
-  <MarkdownGuide ref="markdownGuideRef" />
+  <MarkdownGuide ref="isMdGuideOpen" />
 </template>
