@@ -314,6 +314,8 @@ const handleFollowUser = async (userId) => {
 
 const handleDeletePost = async (postId) => {
   try {
+    const deleteConfirm = confirm("Bạn có chắc muốn xóa bài viết này?");
+    if (!deleteConfirm) return;
     showOptionsDropdown.value = false;
     await blogService.deletePost(postId);
     blogStore.removePostById(postId);

@@ -24,8 +24,16 @@
           @click="handleCopyMarkdown"
           class="w-full text-left px-4 py-2 hover:bg-green-50 flex items-center text-green-600 transition-colors duration-200"
         >
-          <va-icon name="content_copy" color="#10B981" class="mr-3" />
-          <span>Sao chép nội dung Markdown</span>
+          <va-icon
+            :name="isCopied ? 'check' : 'content_copy'"
+            color="#10B981"
+            class="mr-3"
+          />
+          <span>{{
+            isCopied
+              ? "Đã copy nội dung Markdown"
+              : "Sao chép nội dung Markdown"
+          }}</span>
         </button>
       </template>
 
@@ -81,8 +89,16 @@
           @click="handleCopyMarkdown"
           class="w-full text-left px-4 py-2 hover:bg-green-50 flex items-center text-green-600 transition-colors duration-200"
         >
-          <va-icon name="content_copy" color="#10B981" class="mr-3" />
-          <span>Sao chép nội dung Markdown</span>
+          <va-icon
+            :name="isCopied ? 'check' : 'content_copy'"
+            color="#10B981"
+            class="mr-3"
+          />
+          <span>{{
+            isCopied
+              ? "Đã copy nội dung Markdown"
+              : "Sao chép nội dung Markdown"
+          }}</span>
         </button>
       </template>
 
@@ -101,7 +117,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
 
 const props = defineProps({
   post: {
@@ -145,6 +161,9 @@ const emit = defineEmits([
   "copy-markdown",
 ]);
 
+// State để theo dõi trạng thái copy
+const isCopied = ref(false);
+
 const handleEditPost = () => {
   emit("edit-post", props.post.id);
 };
@@ -173,7 +192,13 @@ const handleReport = () => {
   emit("report", props.post.id);
 };
 
-const handleCopyMarkdown = () => {
+const handleCopyMarkdown = async () => {
+  isCopied.value = true;
+
+  setTimeout(() => {
+    isCopied.value = false;
+  }, 2000);
+
   emit("copy-markdown", props.post.body);
 };
 </script>
