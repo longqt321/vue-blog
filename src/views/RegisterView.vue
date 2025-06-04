@@ -262,6 +262,7 @@ const otpCountdown = ref(0);
 const errors = ref({});
 
 const validateForm = () => {
+  errors.value = {};
   if (!formData.value.firstName) {
     errors.value.firstName = "Tên không được để trống";
   }
@@ -308,6 +309,7 @@ const validateForm = () => {
 };
 
 const handleRegister = async () => {
+  console.log("register");
   if (!validateForm()) return;
 
   isLoading.value = true;
@@ -323,7 +325,7 @@ const handleRegister = async () => {
       confirmPassword: formData.value.confirmPassword,
       otpCode: formData.value.otp,
     };
-
+    console.log("userData", userData);
     await authService.register(userData);
     router.push("/login");
   } catch (error) {

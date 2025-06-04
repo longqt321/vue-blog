@@ -15,7 +15,7 @@
           </div>
         </div>
         <h2 class="text-2xl font-bold text-blue-800">Đăng Nhập</h2>
-        <p class="text-gray-500 mt-2">Chào mừng trở lại với Blog App</p>
+        <p class="text-gray-500 mt-2">Chào mừng trở lại với Blog app</p>
       </div>
 
       <!-- Login Form -->
