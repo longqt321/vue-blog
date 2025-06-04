@@ -36,12 +36,10 @@
             :error-messages="errors.username"
             prepend-inner-icon="person"
           />
-        </div>        <!-- OTP Field -->
+        </div>
+        <!-- OTP Field -->
         <div>
-          <label
-            for="otp"
-            class="block text-sm font-medium text-blue-800 mb-1"
-          >
+          <label for="otp" class="block text-sm font-medium text-blue-800 mb-1">
             Mã xác thực OTP <span class="text-red-500">*</span>
           </label>
           <div class="flex items-start gap-2">
@@ -265,13 +263,11 @@ const handleSendOtp = async () => {
   errorMessage.value = "";
 
   try {
-    // Call resetPassword API to send OTP (step 1: request OTP)
     await authService.confirmEmail({
       username: formData.value.username,
       email: "",
     });
 
-    // Start countdown
     otpCountdown.value = 30;
     const countdownInterval = setInterval(() => {
       otpCountdown.value--;
@@ -282,7 +278,6 @@ const handleSendOtp = async () => {
 
     successMessage.value = "Mã OTP đã được gửi đến email của bạn!";
 
-    // Clear success message after 3 seconds
     setTimeout(() => {
       successMessage.value = "";
     }, 3000);

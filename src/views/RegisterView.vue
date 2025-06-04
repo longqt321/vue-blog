@@ -97,34 +97,34 @@
           />
         </div>
         <!-- OTP Field -->
-        <div class="flex items-end gap-2">
-          <div class="flex-1">
-            <label
-              for="otp"
-              class="block text-sm font-medium text-blue-800 mb-1"
-            >
-              Mã xác thực OTP <span class="text-red-500">*</span>
-            </label>
-            <va-input
-              id="otp"
-              v-model="formData.otp"
-              placeholder="Nhập mã OTP"
-              class="w-full"
+        <div>
+          <label for="otp" class="block text-sm font-medium text-blue-800 mb-1">
+            Mã xác thực OTP <span class="text-red-500">*</span>
+          </label>
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <va-input
+                id="otp"
+                v-model="formData.otp"
+                placeholder="Nhập mã OTP"
+                class="w-full"
+                color="primary"
+                :error="!!errors.otp"
+                :error-messages="errors.otp"
+                prepend-inner-icon="verified_user"
+              />
+            </div>
+            <va-button
+              type="button"
               color="primary"
-              :error="!!errors.otp"
-              :error-messages="errors.otp"
-              prepend-inner-icon="verified_user"
-            />
+              class="flex-shrink-0 h-[40px]"
+              @click="handleSendOtp"
+              :loading="isSendingOtp"
+              :disabled="isSendingOtp || otpCountdown > 0"
+            >
+              {{ otpCountdown > 0 ? `${otpCountdown}s` : "Gửi OTP" }}
+            </va-button>
           </div>
-          <va-button
-            type="button"
-            color="primary"
-            class="mb-1"
-            @click="handleSendOtp"
-            :loading="isSendingOtp"
-          >
-            Gửi lại mã OTP
-          </va-button>
         </div>
 
         <!-- Password Field -->
@@ -179,7 +179,6 @@
             :error-messages="errors.agreeToTerms"
           />
         </div>
-
         <!-- Error Message Display -->
         <va-alert
           v-if="errorMessage"
@@ -189,6 +188,17 @@
           class="my-4"
         >
           {{ errorMessage }}
+        </va-alert>
+
+        <!-- Success Message Display -->
+        <va-alert
+          v-if="successMessage"
+          color="success"
+          icon="check_circle"
+          bordered
+          class="my-4"
+        >
+          {{ successMessage }}
         </va-alert>
 
         <!-- Submit Button -->
@@ -245,8 +255,10 @@ const formData = ref({
 
 // Validation
 const errorMessage = ref("");
+const successMessage = ref("");
 const isLoading = ref(false);
 const isSendingOtp = ref(false);
+const otpCountdown = ref(0);
 const errors = ref({});
 
 const validateForm = () => {
@@ -332,13 +344,36 @@ const handleSendOtp = async () => {
   }
   isSendingOtp.value = true;
   errors.value.otp = "";
+  errorMessage.value = "";
+
   try {
     await authService.confirmEmail({
       username: formData.value.username,
       email: formData.value.email,
     });
+
+    // Start countdown
+    otpCountdown.value = 30;
+    const countdownInterval = setInterval(() => {
+      otpCountdown.value--;
+      if (otpCountdown.value <= 0) {
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+
+    successMessage.value = "Mã OTP đã được gửi đến email của bạn!";
+
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      successMessage.value = "";
+    }, 3000);
   } catch (error) {
-    errorMessage.value = error.response.data?.message;
+    if (error.response) {
+      errorMessage.value =
+        error.response.data?.message || "Có lỗi xảy ra khi gửi OTP";
+    } else {
+      errorMessage.value = "Có lỗi xảy ra khi gửi OTP. Vui lòng thử lại sau.";
+    }
   } finally {
     isSendingOtp.value = false;
   }
