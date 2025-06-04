@@ -335,9 +335,7 @@ const handleReport = async (postId) => {
 
 const handleCopyMarkDown = async (mdContent) => {
   try {
-    console.log("Copying markdown content to clipboard:", mdContent);
     await navigator.clipboard.writeText(mdContent);
-    console.log("Markdown content copied to clipboard");
   } catch (error) {
     console.error("Failed to copy markdown content", error);
   }
