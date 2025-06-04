@@ -44,6 +44,7 @@
             class="hover:bg-blue-50"
           />
           <!-- Post Options Dropdown -->
+
           <BaseDropdown v-if="showOptionsDropdown" class="w-64 ridght-0">
             <PostOptionsDropdown
               :post="post"
@@ -59,6 +60,7 @@
               @follow-user="handleFollowUser"
               @delete-post="handleDeletePost"
               @report="handleReport"
+              @copy-markdown="handleCopyMarkDown"
             />
           </BaseDropdown>
         </div>
@@ -328,6 +330,16 @@ const handleReport = async (postId) => {
     await blogService.reportPost(postId);
   } catch (error) {
     console.error("Failed to report post", error);
+  }
+};
+
+const handleCopyMarkDown = async (mdContent) => {
+  try {
+    console.log("Copying markdown content to clipboard:", mdContent);
+    await navigator.clipboard.writeText(mdContent);
+    console.log("Markdown content copied to clipboard");
+  } catch (error) {
+    console.error("Failed to copy markdown content", error);
   }
 };
 

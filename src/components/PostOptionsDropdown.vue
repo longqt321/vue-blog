@@ -17,6 +17,16 @@
           <va-icon name="flag" color="#EF4444" class="mr-3" />
           <span>Xóa bài viết</span>
         </button>
+
+        <div class="border-t border-blue-100 my-1"></div>
+
+        <button
+          @click="handleCopyMarkdown"
+          class="w-full text-left px-4 py-2 hover:bg-green-50 flex items-center text-green-600 transition-colors duration-200"
+        >
+          <va-icon name="content_copy" color="#10B981" class="mr-3" />
+          <span>Sao chép nội dung Markdown</span>
+        </button>
       </template>
 
       <!-- Non-owner options -->
@@ -57,13 +67,22 @@
             isFollowingOwner ? "Bỏ theo dõi người dùng" : "Theo dõi người dùng"
           }}</span>
         </button>
-
         <button
           @click="handleReport"
           class="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center text-red-600 transition-colors duration-200"
         >
           <va-icon name="flag" color="#EF4444" class="mr-3" />
           <span>Báo cáo bài viết</span>
+        </button>
+
+        <div class="border-t border-blue-100 my-1"></div>
+
+        <button
+          @click="handleCopyMarkdown"
+          class="w-full text-left px-4 py-2 hover:bg-green-50 flex items-center text-green-600 transition-colors duration-200"
+        >
+          <va-icon name="content_copy" color="#10B981" class="mr-3" />
+          <span>Sao chép nội dung Markdown</span>
         </button>
       </template>
 
@@ -123,6 +142,7 @@ const emit = defineEmits([
   "follow-user",
   "delete-post",
   "report",
+  "copy-markdown",
 ]);
 
 const handleEditPost = () => {
@@ -151,5 +171,9 @@ const handleDeletePost = () => {
 
 const handleReport = () => {
   emit("report", props.post.id);
+};
+
+const handleCopyMarkdown = () => {
+  emit("copy-markdown", props.post.body);
 };
 </script>
