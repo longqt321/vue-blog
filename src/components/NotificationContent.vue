@@ -22,13 +22,13 @@ const notificationTitle = computed(() => notifStore.getNotificationTitle);
     <div
       class="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white flex justify-between items-center"
     >
-      <h3 class="font-bold text-lg">Notifications</h3>
+      <h3 class="font-bold text-lg">Thông báo</h3>
       <button
         @click="markAllAsRead"
         class="text-sm text-blue-100 hover:text-white transition-colors duration-200 flex items-center"
       >
         <va-icon name="done_all" size="small" class="mr-1" />
-        Mark all as read
+        Đánh dấu tất cả đã đọc
       </button>
     </div>
 
@@ -39,7 +39,7 @@ const notificationTitle = computed(() => notifStore.getNotificationTitle);
         class="p-6 text-center text-gray-500"
       >
         <va-icon name="notifications_off" size="large" color="#3B82F6" />
-        <p class="mt-2">No notifications</p>
+        <p class="mt-2">Không có thông báo</p>
       </div>
 
       <div v-else>
@@ -52,7 +52,7 @@ const notificationTitle = computed(() => notifStore.getNotificationTitle);
     <!-- Footer -->
     <div class="p-3 bg-blue-50 text-center border-t border-blue-100">
       <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-        View all notifications
+        Xem tất cả thông báo
       </button>
     </div>
   </div>

@@ -14,4 +14,8 @@ export default {
     const response = await api.post("/auth/confirm-email", userInfo);
     return response.data;
   },
+  async resetPassword(data) {
+    const response = await api.post("/auth/reset-password", data);
+    return response.data;
+  },
 };

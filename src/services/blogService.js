@@ -41,6 +41,7 @@ export default {
 
   async createPost(post) {
     try {
+      console.log(post);
       const response = await api.post(`/blogs`, post);
       return response.data;
     } catch (error) {

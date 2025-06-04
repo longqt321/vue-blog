@@ -3,6 +3,7 @@ import HomeView from "./views/HomeView.vue";
 import ProfileView from "./views/ProfileView.vue";
 import LoginView from "./views/LoginView.vue";
 import RegisterView from "./views/RegisterView.vue";
+import ResetPasswordView from "./views/ResetPasswordView.vue";
 import { useAuthStore } from "@/stores/authStore";
 
 const router = createRouter({
@@ -18,6 +19,12 @@ const router = createRouter({
       path: "/register",
       name: "register",
       component: RegisterView,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: "/reset-password",
+      name: "reset-password",
+      component: ResetPasswordView,
       meta: { requiresAuth: false },
     },
     {

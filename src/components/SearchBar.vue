@@ -10,9 +10,13 @@ const props = defineProps({
     type: String,
     default: "Search...",
   },
+  showAdvancedButton: {
+    type: Boolean,
+    default: false
+  }
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "advanced-search"]);
 const searchText = ref(props.modelValue);
 
 watch(
@@ -29,6 +33,10 @@ const updateValue = (event) => {
 const clearSearch = () => {
   searchText.value = "";
   emit("update:modelValue", "");
+};
+
+const openAdvancedSearch = () => {
+  emit("advanced-search");
 };
 </script>
 <template>

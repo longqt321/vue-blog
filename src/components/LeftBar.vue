@@ -33,8 +33,17 @@ watch(searchQuery, (newVal) => {
 });
 
 const handleTagClick = (tag) => {
-  searchQuery.value = `#${tag}`;
-  performSearch(searchQuery.value);
+  if (searchQuery.value.includes(`#${tag}`)) {
+    // If tag is already in the search query, remove it
+    searchQuery.value = searchQuery.value.replace(`#${tag}`, "").trim();
+  } else {
+    // If tag is not in the search query, add it
+    if (searchQuery.value) {
+      searchQuery.value += `, #${tag}`;
+    } else {
+      searchQuery.value = `#${tag}`;
+    }
+  }
 };
 </script>
 
@@ -45,7 +54,7 @@ const handleTagClick = (tag) => {
     <!-- Header Section -->
     <div class="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
       <h2 class="text-lg font-bold flex items-center gap-2">
-        Discover Content
+        Tìm kiếm nội dung
         <span class="relative group">
           <va-icon
             name="help_outline"
@@ -83,7 +92,7 @@ const handleTagClick = (tag) => {
 
     <!-- Filter Section -->
     <div class="p-4 border-b border-blue-50">
-      <h3 class="font-medium text-blue-800 mb-3">Popular Tags</h3>
+      <h3 class="font-medium text-blue-800 mb-3">Thẻ phổ biến</h3>
       <div class="flex flex-wrap gap-2">
         <va-chip
           v-for="tag in popularTags"

@@ -1,7 +1,4 @@
 import { defineStore } from "pinia";
-import authService from "@/services/authService";
-import router from "@/router";
-import { normalizeUser } from "@/composables/userFormater";
 import { useUserStore } from "./userStore";
 import { useBlogStore } from "./blogStore";
 
@@ -48,6 +45,6 @@ export const useAuthStore = defineStore("auth", {
 
   getters: {
     shouldSkipAuth: (state) => state.skipAuth || state.isAuthenticated,
-    getUser: (state) => normalizeUser(state.user),
+    getUser: (state) => state.user,
   },
 });

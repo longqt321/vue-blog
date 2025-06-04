@@ -42,7 +42,7 @@
                   class="w-full"
                   @click="modalStore.openModalForEditUser(profileUser)"
                 >
-                  Edit Profile
+                  Chỉnh sửa hồ sơ
                 </va-button>
 
                 <template v-else>
@@ -65,8 +65,8 @@
                   >
                     {{
                       userRelationship === UserRelationship.FOLLOWING
-                        ? "Following"
-                        : "Follow"
+                        ? "Đang theo dõi"
+                        : "Theo dõi"
                     }}
                   </va-button>
 
@@ -88,8 +88,8 @@
                   >
                     {{
                       userRelationship === UserRelationship.BLOCKING
-                        ? "Unblock"
-                        : "Block"
+                        ? "Bỏ chặn"
+                        : "Chặn"
                     }}
                   </va-button>
                 </template>
@@ -103,28 +103,30 @@
                   <div class="text-lg font-bold text-blue-800">
                     {{ profileUser.postCount }}
                   </div>
-                  <div class="text-xs text-gray-500">Posts</div>
+                  <div class="text-xs text-gray-500">Bài viết</div>
                 </div>
                 <div>
                   <div class="text-lg font-bold text-blue-800">
                     {{ profileUser.followersCount }}
                   </div>
-                  <div class="text-xs text-gray-500">Followers</div>
+                  <div class="text-xs text-gray-500">Người theo dõi</div>
                 </div>
                 <div>
                   <div class="text-lg font-bold text-blue-800">
                     {{ profileUser.followingCount }}
                   </div>
-                  <div class="text-xs text-gray-500">Following</div>
+                  <div class="text-xs text-gray-500">Đang theo dõi</div>
                 </div>
               </div>
             </div>
 
             <!-- Bio -->
             <div class="py-4 px-6">
-              <h3 class="font-medium text-gray-700 mb-2">Description</h3>
+              <h3 class="font-medium text-gray-700 mb-2">Mô tả</h3>
               <p class="text-gray-600 text-sm mb-4">
-                {{ profileUser.description || "No description provided yet." }}
+                {{
+                  profileUser.description || "Chưa có mô tả nào được cung cấp."
+                }}
               </p>
 
               <div class="space-y-3 text-sm">
@@ -176,13 +178,13 @@
               class="bg-white rounded-xl shadow-md p-8 text-center"
             >
               <h3 class="mt-4 text-xl font-medium text-gray-800">
-                No posts yet
+                Chưa có bài viết nào
               </h3>
               <p class="mt-2 text-gray-500">
                 {{
                   isCurrentUser
-                    ? "Share your first post with the community!"
-                    : "This user has not shared any posts yet."
+                    ? "Hãy chia sẻ bài viết đầu tiên của bạn với cộng đồng!"
+                    : "Người dùng này chưa chia sẻ bài viết nào."
                 }}
               </p>
             </div>
@@ -200,13 +202,13 @@
               class="bg-white rounded-xl shadow-md p-8 text-center"
             >
               <h3 class="mt-4 text-xl font-medium text-gray-800">
-                No posts saved yet
+                Chưa có bài viết đã lưu
               </h3>
               <p class="mt-2 text-gray-500">
                 {{
                   isCurrentUser
-                    ? "Save posts to read later"
-                    : "This user has not saved any posts yet."
+                    ? "Lưu bài viết để đọc sau"
+                    : "Người dùng này chưa lưu bài viết nào."
                 }}
               </p>
             </div>
@@ -222,13 +224,13 @@
               class="bg-white rounded-xl shadow-md p-8 text-center"
             >
               <h3 class="mt-4 text-xl font-medium text-gray-800">
-                No posts hidden yet
+                Chưa có bài viết ẩn
               </h3>
               <p class="mt-2 text-gray-500">
                 {{
                   isCurrentUser
-                    ? "Hidden posts will appear here"
-                    : "This user has not hidden any posts yet."
+                    ? "Bài viết ẩn sẽ xuất hiện ở đây"
+                    : "Người dùng này chưa ẩn bài viết nào."
                 }}
               </p>
             </div>

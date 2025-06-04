@@ -41,11 +41,11 @@ export const useBlogStore = defineStore("blog", {
       const addToFilter = (token) => {
         const trimmed = trim(token);
         if (!trimmed) return;
-        if (trimmed.startsWith('#')) {
+        if (trimmed.startsWith("#")) {
           filter.hashtags.push(trimmed.substring(1));
-        } else if (trimmed.startsWith('@')) {
+        } else if (trimmed.startsWith("@")) {
           filter.username = trimmed.substring(1);
-        } else if (trimmed.startsWith('!')) {
+        } else if (trimmed.startsWith("!")) {
           filter.author = trimmed.substring(1);
         } else {
           filter.title = trimmed;
@@ -86,7 +86,7 @@ export const useBlogStore = defineStore("blog", {
         this.hasMorePosts = !pageData.last;
         this.currentPage = page;
       } catch (error) {
-        this.error = "Failed to load posts. Please try again later.";
+        this.error = "Không thể tải bài viết. Vui lòng thử lại sau.";
         throw error;
       } finally {
         this.isLoading = false;

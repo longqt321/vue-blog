@@ -35,7 +35,7 @@ onMounted(async () => {
   >
     <!-- Header Section -->
     <div class="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-      <h2 class="text-lg font-bold">Famous users</h2>
+      <h2 class="text-lg font-bold">Những người dùng khác</h2>
     </div>
     <!-- Search Friends Section -->
     <div class="p-4 border-b border-blue-50">
@@ -47,7 +47,6 @@ onMounted(async () => {
 
     <!-- Online Friends Section -->
     <div class="p-4 border-b border-blue-50">
-      <h3 class="font-medium text-blue-800 mb-3">Người dùng phổ biến</h3>
       <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
         <!-- Loading State -->
         <VaInfiniteScroll
@@ -64,7 +63,7 @@ onMounted(async () => {
             class="text-center py-4 text-gray-500"
           >
             <va-icon name="people_alt" size="large" color="#4285F4" />
-            <p class="mt-2">No users suggested</p>
+            <p class="mt-2">Không có người dùng được gợi ý</p>
           </div>
 
           <!-- Friends List -->

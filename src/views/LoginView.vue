@@ -60,12 +60,14 @@
             prepend-inner-icon="lock"
           />
         </div>
-
         <!-- Remember me and Forgot password -->
         <div class="flex justify-between items-center">
-          <a href="#" class="text-sm text-blue-600 hover:underline"
-            >Quên mật khẩu?</a
+          <router-link
+            to="/reset-password"
+            class="text-sm text-blue-600 hover:underline"
           >
+            Quên mật khẩu?
+          </router-link>
         </div>
 
         <!-- Error Message Display -->

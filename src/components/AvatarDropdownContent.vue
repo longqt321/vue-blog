@@ -16,7 +16,7 @@
       </div>
       <div class="ml-3">
         <div class="font-bold text-blue-900">
-          {{ authStore.getUser.fullName }}
+          {{ authStore.getUser.lastName + " " + authStore.getUser.firstName }}
         </div>
         <div class="text-sm text-gray-500">
           @{{ authStore.getUser.username }}
@@ -32,7 +32,7 @@
         class="w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center text-gray-700 transition-colors duration-200"
       >
         <va-icon name="person" color="#3B82F6" class="mr-3" />
-        <span>Your Profile</span>
+        <span>Hồ sơ của bạn</span>
       </button>
 
       <!-- Saved Posts
@@ -59,7 +59,7 @@
         class="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center text-red-600 transition-colors duration-200"
       >
         <va-icon name="logout" color="#EF4444" class="mr-3" />
-        <span>Logout</span>
+        <span>Đăng xuất</span>
       </button>
     </div>
   </div>

@@ -6,7 +6,8 @@
     <div class="flex justify-between items-start p-5 border-b border-blue-50">
       <div class="flex items-start">
         <div
-          class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-100 flex-shrink-0"
+          @click="goToProfile"
+          class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-100 flex-shrink-0 cursor-pointer"
         >
           <DynamicImage
             :imageId="post.author?.avatarId"
@@ -106,7 +107,7 @@
           size="small"
           color="info"
           outlined
-          class="text-xs"
+          class="cursor-pointer text-xs"
         >
           #{{ tag }}
         </va-chip>
@@ -125,12 +126,12 @@
           v-if="!isPostOwner"
           @click="handleLikePost"
           :class="[
-            'flex items-center',
+            'cursor-pointer flex items-center',
             isLiked ? 'text-blue-600' : 'text-gray-600',
           ]"
         >
           <va-icon name="thumb_up" />
-          <span class="ml-1 text-sm">Like</span>
+          <span class="ml-1 text-sm">Thích</span>
         </button>
         <!-- <button class="flex items-center text-gray-600 hover:text-blue-600">
           <va-icon name="comment" />
@@ -155,6 +156,7 @@ import DynamicImage from "./DynamicImage.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useModalStore } from "@/stores/modalStore";
 import userService from "@/services/userService";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   post: {
@@ -167,6 +169,7 @@ const authStore = useAuthStore();
 const blogStore = useBlogStore();
 const userStore = useUserStore();
 const modalStore = useModalStore();
+const router = useRouter();
 
 // UI state
 const contentRef = ref(null);
@@ -190,6 +193,10 @@ const isPostOwner = computed(() => {
 
 const toggleOptionsDropdown = () => {
   showOptionsDropdown.value = !showOptionsDropdown.value;
+};
+
+const goToProfile = () => {
+  router.push({ name: "profile", params: { id: props.post.author.id } });
 };
 
 const handleLikePost = async () => {

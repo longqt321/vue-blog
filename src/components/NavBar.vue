@@ -67,7 +67,7 @@
                   error-icon-size="medium"
                 />
               </div>
-              <span class="hidden md:block font-medium">Profile</span>
+              <span class="hidden md:block font-medium">Hồ sơ</span>
               <va-icon
                 name="expand_more"
                 color="#FFFFFF"
