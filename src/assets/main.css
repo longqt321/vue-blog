@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
-/* Custom scrollbar styling */
+* {
+  scrollbar-width: none; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* Custom scrollbar styling for our container only */
 .scrollbar-custom::-webkit-scrollbar {
   width: 8px;
+  display: block !important; /* Override the global hide */
 }
 
 .scrollbar-custom::-webkit-scrollbar-track {
@@ -19,22 +28,29 @@
   background-color: #1d4ed8;
 }
 
-/* Base styles - hide browser scroll bar */
-html, body {
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+}
+
+html {
   height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
 body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden !important;
   background-color: #eff6ff;
   color: #1f2937;
   font-family: sans-serif;
 }
 
 #app {
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Make sure the app container is the only scrollable element */
@@ -42,6 +58,7 @@ body {
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Component styles */

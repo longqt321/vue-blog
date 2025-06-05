@@ -75,26 +75,19 @@ export const useBlogStore = defineStore("blog", {
         if (response.success === false) {
           this.error = response.message || "Unknown error occurred";
           return;
-        }        // Trích xuất dữ liệu từ response
+        } // Trích xuất dữ liệu từ response
         const pageData = response.data;
-        console.log("Page data received:", pageData);
-        console.log("Content length:", pageData.content?.length);
-        console.log("Is last page:", pageData.last);
-        console.log("Current page:", page);
 
         if (append && page > 0) {
           // Append new posts to existing ones for infinite scroll
           this.publicPosts = [...this.publicPosts, ...pageData.content];
-          console.log("Appended posts, total now:", this.publicPosts.length);
         } else {
           // Replace posts (initial load or refresh)
           this.publicPosts = pageData.content;
-          console.log("Replaced posts, total now:", this.publicPosts.length);
         }
 
         this.hasMorePosts = !pageData.last;
         this.currentPage = page;
-        console.log("hasMorePosts set to:", this.hasMorePosts);
       } catch (error) {
         this.error = "Không thể tải bài viết. Vui lòng thử lại sau.";
         throw error;
