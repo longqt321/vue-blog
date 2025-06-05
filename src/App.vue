@@ -34,8 +34,10 @@ provide("vuestic-config", {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-blue-50 text-gray-800 font-sans">
-    <router-view class="flex-1"></router-view>
+  <div id="app-container" class="scrollbar-custom">
+    <div class="flex flex-col min-h-screen bg-blue-50 text-gray-800 font-sans">
+      <router-view class="flex-1"></router-view>
+    </div>
   </div>
 </template>
 

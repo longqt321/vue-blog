@@ -16,10 +16,15 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
 const posts = computed(() => blogStore.getPublicPosts);
 const isLoading = computed(() => blogStore.isLoading);
 const error = computed(() => blogStore.getError);
+const hasMorePosts = computed(() => blogStore.hasMore);
 
-const loadMore = () => {
-  console.log("LOAD MORE!!");
-  return blogStore.loadMorePublicPosts();
+const loadMore = async () => {
+  console.log("LOAD MORE!! Current page:", blogStore.getCurrentPage, "Has more:", hasMorePosts.value);
+  if (!hasMorePosts.value || isLoading.value) {
+    console.log("Load more cancelled - hasMore:", hasMorePosts.value, "isLoading:", isLoading.value);
+    return;
+  }
+  return await blogStore.loadMorePublicPosts();
 };
 
 // On first mount, fetch posts (PUBLIC only)
@@ -87,11 +92,33 @@ watch(
       </h3>
       <p class="mt-2 text-gray-600">
         Hãy là người đầu tiên chia sẻ suy nghĩ của bạn với cộng đồng!
-      </p>
-    </div>
-
+      </p>    </div>    <!-- Posts Display with Infinite Scroll -->
     <div v-else class="space-y-5">
-      <BlogPost v-for="post in posts" :key="post.id" :post="post" />
+      <VaInfiniteScroll
+        :load="loadMore"
+        :disabled="!hasMorePosts"
+        scroll-target="#app-container"
+        class="space-y-5"
+      >
+        <!-- Posts List -->
+        <BlogPost v-for="post in posts" :key="post.id" :post="post" />
+        
+        <!-- Loading indicator -->
+        <template #loading>
+          <div class="flex justify-center items-center py-6">
+            <va-progress-circle indeterminate color="primary" size="small" />
+            <span class="ml-3 text-blue-700 font-medium">Đang tải thêm bài viết...</span>
+          </div>
+        </template>
+        
+        <!-- End message -->
+        <template #end>
+          <div class="text-center py-8">
+            <va-icon name="check_circle" size="large" color="#10B981" />
+            <p class="mt-2 text-gray-600 font-medium">Bạn đã xem hết tất cả bài viết!</p>
+          </div>
+        </template>
+      </VaInfiniteScroll>
     </div>
   </div>
 </template>

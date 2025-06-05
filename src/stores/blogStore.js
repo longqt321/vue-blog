@@ -58,7 +58,7 @@ export const useBlogStore = defineStore("blog", {
       }
       return filter;
     },
-    async fetchPublicPosts(page = 0) {
+    async fetchPublicPosts(page = 0, append = false) {
       this.isLoading = true;
       this.error = null;
       try {
@@ -75,15 +75,26 @@ export const useBlogStore = defineStore("blog", {
         if (response.success === false) {
           this.error = response.message || "Unknown error occurred";
           return;
+        }        // Trích xuất dữ liệu từ response
+        const pageData = response.data;
+        console.log("Page data received:", pageData);
+        console.log("Content length:", pageData.content?.length);
+        console.log("Is last page:", pageData.last);
+        console.log("Current page:", page);
+
+        if (append && page > 0) {
+          // Append new posts to existing ones for infinite scroll
+          this.publicPosts = [...this.publicPosts, ...pageData.content];
+          console.log("Appended posts, total now:", this.publicPosts.length);
+        } else {
+          // Replace posts (initial load or refresh)
+          this.publicPosts = pageData.content;
+          console.log("Replaced posts, total now:", this.publicPosts.length);
         }
 
-        // Trích xuất dữ liệu từ response
-        const pageData = response.data;
-
-        this.publicPosts = pageData.content;
         this.hasMorePosts = !pageData.last;
         this.currentPage = page;
-        console.log(this.publicPosts);
+        console.log("hasMorePosts set to:", this.hasMorePosts);
       } catch (error) {
         this.error = "Không thể tải bài viết. Vui lòng thử lại sau.";
         throw error;
@@ -96,7 +107,7 @@ export const useBlogStore = defineStore("blog", {
       console.log("LOAD MORE!!");
       if (!this.hasMorePosts || this.isLoading) return Promise.resolve();
 
-      return await this.fetchPublicPosts(this.currentPage + 1);
+      return await this.fetchPublicPosts(this.currentPage + 1, true);
     },
 
     async createPost(postData) {

@@ -1,47 +1,100 @@
 @import "tailwindcss";
 
-@layer utilities {
-  .scrollbar-custom::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .scrollbar-custom::-webkit-scrollbar-track {
-    @apply bg-gray-200 rounded-full;
-  }
-
-  .scrollbar-custom::-webkit-scrollbar-thumb {
-    @apply bg-blue-500 rounded-full;
-  }
-
-  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-    @apply bg-blue-700;
-  }
+/* Custom scrollbar styling */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
 }
 
-@layer base {
-  body {
-    @apply bg-blue-50 text-gray-800 font-sans;
-  }
+.scrollbar-custom::-webkit-scrollbar-track {
+  background-color: #e5e7eb;
+  border-radius: 9999px;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200 shadow-md;
-  }
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 9999px;
+}
 
-  .btn-secondary {
-    @apply bg-white hover:bg-gray-100 text-blue-600 border border-blue-300 font-semibold py-2 px-4 rounded-md transition duration-200 shadow-sm;
-  }
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: #1d4ed8;
+}
 
-  .card {
-    @apply bg-white rounded-lg shadow-md p-4 border border-blue-100;
-  }
+/* Base styles - hide browser scroll bar */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
 
-  .input-field {
-    @apply w-full px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-  }
+body {
+  background-color: #eff6ff;
+  color: #1f2937;
+  font-family: sans-serif;
+}
 
-  .blue-gradient {
-    @apply bg-gradient-to-r from-blue-500 to-blue-700;
-  }
+#app {
+  height: 100%;
+}
+
+/* Make sure the app container is the only scrollable element */
+#app-container {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Component styles */
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #2563eb;
+  border: 1px solid #93c5fd;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  border: 1px solid #dbeafe;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.375rem;
+  outline: none;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 0 2px #3b82f6;
+  border-color: transparent;
+}
+
+.blue-gradient {
+  background: linear-gradient(to right, #3b82f6, #1d4ed8);
 }

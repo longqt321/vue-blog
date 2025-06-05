@@ -51,7 +51,7 @@ onMounted(async () => {
         <!-- Loading State -->
         <VaInfiniteScroll
           :load="loadMoreSuggestedUser"
-          :disabled="!isLoading || !moreSuggestedUsersAvailable"
+          :disabled="isLoading || !moreSuggestedUsersAvailable"
         >
           <div v-if="isLoading" class="py-2 text-center">
             <va-progress-circle indeterminate color="primary" size="small" />
