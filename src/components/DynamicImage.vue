@@ -33,7 +33,7 @@ import { useAvatarLoader } from "@/composables/useImageLoader";
 const props = defineProps({
   // Avatar URL from backend
   imageId: {
-    type: String,
+    type: [String, Number],
     default: "",
   },
 

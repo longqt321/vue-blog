@@ -19,8 +19,6 @@
 
         <!-- Right side: User controls -->
         <div class="flex items-center space-x-4">
-          <!-- Theme Toggle -->
-          <ThemeToggle />
           <!-- Notification Bell -->
           <div class="relative">
             <button
@@ -59,7 +57,6 @@
               >
                 <DynamicImage
                   :imageId="authStore.getUser.avatarId"
-                  :alt="avatar"
                   container-class="w-full h-full"
                   image-class="w-full h-full object-cover"
                   loading-size="20px"

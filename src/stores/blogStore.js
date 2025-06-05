@@ -13,7 +13,7 @@ export const useBlogStore = defineStore("blog", {
     hiddenPosts: [],
     error: null,
     currentPage: 0,
-    pageSize: 10,
+    pageSize: 3,
     sortBy: "createdAt,desc",
     hasMorePosts: true,
     searchQuery: "",
@@ -26,7 +26,7 @@ export const useBlogStore = defineStore("blog", {
       this.hiddenPosts = [];
       this.error = null;
       this.currentPage = 0;
-      this.pageSize = 10;
+      this.pageSize = 3;
       this.sortBy = "createdAt,desc";
       this.hasMorePosts = true;
       this.searchQuery = "";
@@ -58,7 +58,6 @@ export const useBlogStore = defineStore("blog", {
       }
       return filter;
     },
-
     async fetchPublicPosts(page = 0) {
       this.isLoading = true;
       this.error = null;
@@ -66,13 +65,12 @@ export const useBlogStore = defineStore("blog", {
         const filter = {
           ...this.parseSearchQuery(),
         };
-        const response = await blogService.getPosts({
-          ...filter,
+        const response = await blogService.getPosts(
+          filter,
           page,
-          size: this.pageSize,
-          sortBy: this.sortBy,
-        });
-        console.log(filter);
+          this.pageSize,
+          this.sortBy
+        );
 
         if (response.success === false) {
           this.error = response.message || "Unknown error occurred";
@@ -85,6 +83,7 @@ export const useBlogStore = defineStore("blog", {
         this.publicPosts = pageData.content;
         this.hasMorePosts = !pageData.last;
         this.currentPage = page;
+        console.log(this.publicPosts);
       } catch (error) {
         this.error = "Không thể tải bài viết. Vui lòng thử lại sau.";
         throw error;

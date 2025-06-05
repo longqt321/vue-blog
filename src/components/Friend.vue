@@ -26,7 +26,6 @@ const goToProfile = () => {
     >
       <DynamicImage
         :imageId="friend.avatarId"
-        :alt="avatar"
         container-class="w-full h-full"
         image-class="w-full h-full object-cover"
         loading-size="20px"

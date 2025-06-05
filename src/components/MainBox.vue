@@ -90,7 +90,6 @@ watch(
       </p>
     </div>
 
-    <!-- Posts Display -->
     <div v-else class="space-y-5">
       <BlogPost v-for="post in posts" :key="post.id" :post="post" />
     </div>

@@ -30,11 +30,11 @@ export default {
       const objectUrl = URL.createObjectURL(blob);
 
       // Log để debug
-      console.log("Image loaded successfully:", {
-        size: blob.size,
-        type: blob.type,
-        url: objectUrl,
-      });
+      // console.log("Image loaded successfully:", {
+      //   size: blob.size,
+      //   type: blob.type,
+      //   url: objectUrl,
+      // });
 
       return objectUrl;
     } catch (error) {

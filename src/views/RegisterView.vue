@@ -327,7 +327,7 @@ const handleRegister = async () => {
     };
     console.log("userData", userData);
     await authService.register(userData);
-    router.push("/login");
+    //router.push("/login");
   } catch (error) {
     console.error("Registration error:", error);
     if (error.response) {
