@@ -327,7 +327,15 @@ const handleRegister = async () => {
     };
     console.log("userData", userData);
     await authService.register(userData);
-    //router.push("/login");
+
+    // Show success message
+    successMessage.value =
+      "Đăng ký tài khoản thành công! Chuyển hướng đến trang đăng nhập...";
+
+    // Redirect after showing success message
+    setTimeout(() => {
+      router.push("/login");
+    }, 2000);
   } catch (error) {
     console.error("Registration error:", error);
     if (error.response) {

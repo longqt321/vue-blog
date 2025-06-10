@@ -52,6 +52,8 @@ onMounted(async () => {
         <VaInfiniteScroll
           :load="loadMoreSuggestedUser"
           :disabled="isLoading || !moreSuggestedUsersAvailable"
+          :offset="100"
+          :debounce="250"
         >
           <div v-if="isLoading" class="py-2 text-center">
             <va-progress-circle indeterminate color="primary" size="small" />
@@ -73,7 +75,6 @@ onMounted(async () => {
             v-for="friend in suggestedUsers"
             :key="friend.id"
             :friend="friend"
-            @click="console.log(123)"
             class="hover:bg-blue-50 transition duration-200 rounded-lg"
           />
         </VaInfiniteScroll>

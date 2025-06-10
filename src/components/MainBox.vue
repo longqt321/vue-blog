@@ -19,19 +19,7 @@ const error = computed(() => blogStore.getError);
 const hasMorePosts = computed(() => blogStore.hasMore);
 
 const loadMore = async () => {
-  console.log(
-    "LOAD MORE!! Current page:",
-    blogStore.getCurrentPage,
-    "Has more:",
-    hasMorePosts.value
-  );
   if (!hasMorePosts.value || isLoading.value) {
-    console.log(
-      "Load more cancelled - hasMore:",
-      hasMorePosts.value,
-      "isLoading:",
-      isLoading.value
-    );
     return;
   }
   return await blogStore.loadMorePublicPosts();
@@ -110,30 +98,12 @@ watch(
         :load="loadMore"
         :disabled="!hasMorePosts"
         scroll-target="#app-container"
+        :offset="200"
+        :debounce="250"
         class="space-y-5"
       >
         <!-- Posts List -->
         <BlogPost v-for="post in posts" :key="post.id" :post="post" />
-
-        <!-- Loading indicator -->
-        <template #loading>
-          <div class="flex justify-center items-center py-6">
-            <va-progress-circle indeterminate color="primary" size="small" />
-            <span class="ml-3 text-blue-700 font-medium"
-              >Đang tải thêm bài viết...</span
-            >
-          </div>
-        </template>
-
-        <!-- End message -->
-        <template #end>
-          <div class="text-center py-8">
-            <va-icon name="check_circle" size="large" color="#10B981" />
-            <p class="mt-2 text-gray-600 font-medium">
-              Bạn đã xem hết tất cả bài viết!
-            </p>
-          </div>
-        </template>
       </VaInfiniteScroll>
     </div>
   </div>

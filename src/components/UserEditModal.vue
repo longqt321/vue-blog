@@ -65,11 +65,19 @@
           class="w-full"
           preset="bordered"
         />
-
         <va-input
           v-model="editForm.firstName"
           label="Tên"
           placeholder="Nhập tên"
+          class="w-full"
+          preset="bordered"
+        />
+
+        <va-input
+          v-model="editForm.email"
+          label="Email"
+          placeholder="Nhập email"
+          type="email"
           class="w-full"
           preset="bordered"
         />
@@ -126,7 +134,6 @@ import DynamicImage from "./DynamicImage.vue";
 
 const authStore = useAuthStore();
 const modalStore = useModalStore();
-const userStore = useUserStore();
 const isOpen = computed(() => modalStore.isUserEditOpen);
 
 const defaultAvatar = "/assets/avatar.jpg";
@@ -136,10 +143,11 @@ const uploadingAvatar = ref(false);
 const updatingProfile = ref(false);
 
 const editForm = ref({
-  lastName: "",
-  firstName: "",
-  description: "",
-  avatarId: "", // ID của ảnh trên server
+  lastName: authStore.getUser.lastName || "",
+  firstName: authStore.getUser.firstName || "",
+  email: authStore.getUser.email || "",
+  description: authStore.getUser.description || "",
+  avatarId: authStore.getUser.avatarId || "",
 });
 
 // Gán dữ liệu khi mở modal
@@ -148,6 +156,7 @@ watch(isOpen, (open) => {
     const user = authStore.getUser;
     editForm.value.lastName = user.lastName || "";
     editForm.value.firstName = user.firstName || "";
+    editForm.value.email = user.email || "";
     editForm.value.description = user.description || "";
     editForm.value.avatarId = user.avatarId || "";
   }
@@ -158,12 +167,7 @@ const closeModal = () => {
 };
 
 const handleAvatarUpload = async (file) => {
-  console.log("Avatar file added:", file);
-  console.log("File object type:", typeof file);
-  console.log("File properties:", Object.keys(file));
-
   if (!file) {
-    console.log("No file provided");
     return;
   }
 
@@ -171,25 +175,15 @@ const handleAvatarUpload = async (file) => {
     uploadingAvatar.value = true;
 
     // VaFileUpload có thể trả về file trực tiếp hoặc wrapped object
-    let actualFile = file;
 
     // Kiểm tra nếu file là wrapper object
-    if (file.file) {
-      actualFile = file.file;
-    } else if (file.data) {
-      actualFile = file.data;
-    }
-
-    console.log("Actual file:", actualFile);
-    console.log("File name:", actualFile.name);
-    console.log("File type:", actualFile.type);
-    console.log("File size:", actualFile.size);
+    const actualFile = file[0];
 
     // Gọi API upload ảnh
-    //const imageId = await imageService.uploadAvatar(actualFile);
+    const imageId = await imageService.uploadAvatar(actualFile);
 
     // Cập nhật avatarId trong form
-    //editForm.value.avatarId = imageId;
+    editForm.value.avatarId = imageId;
 
     console.log("Avatar uploaded successfully:", imageId);
 
@@ -198,27 +192,19 @@ const handleAvatarUpload = async (file) => {
     alert("Tải ảnh lên thành công!");
   } catch (error) {
     console.error("Error uploading avatar:", error);
-    alert(`Lỗi upload ảnh: ${error.message}`);
   } finally {
     uploadingAvatar.value = false;
   }
 };
 
-const handleAvatarRemove = (file) => {
-  console.log("Avatar file removed:", file);
-  // Có thể reset avatarId về giá trị ban đầu nếu cần
-  // editForm.value.avatarId = authStore.getUser.avatarId || "";
-};
-
 const submitEditProfile = async () => {
   try {
-    updatingProfile.value = true;
-
-    // Chuẩn bị dữ liệu cập nhật
+    updatingProfile.value = true; // Chuẩn bị dữ liệu cập nhật
     const updatedUser = {
       id: authStore.getUser.id,
       firstName: editForm.value.firstName,
       lastName: editForm.value.lastName,
+      email: editForm.value.email,
       description: editForm.value.description,
     };
 
@@ -235,13 +221,9 @@ const submitEditProfile = async () => {
     // Gọi API cập nhật user
     await userService.updateUser(updatedUser.id, updatedUser);
 
-    // Cập nhật store nếu cần
-    await authStore.fetchUser(); // Refresh user data
-
     closeModal();
   } catch (error) {
     console.error("Error updating profile:", error);
-    alert(`Lỗi cập nhật hồ sơ: ${error.message}`);
   } finally {
     updatingProfile.value = false;
   }

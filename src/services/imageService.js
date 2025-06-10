@@ -22,9 +22,7 @@ export default {
 
       // Lấy content-type từ response header
       const contentType =
-        response.headers["content-type"] ||
-        response.headers["Content-Type"] ||
-        "image/jpeg";
+        response.headers["content-type"] || response.headers["Content-Type"];
 
       const blob = new Blob([response.data], { type: contentType });
       const objectUrl = URL.createObjectURL(blob);

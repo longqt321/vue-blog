@@ -195,10 +195,7 @@ export const useUserStore = defineStore("user", {
         if (page === 0) {
           this.data.suggestedUsers = pageData.content;
         } else {
-          this.data.suggestedUsers = [
-            ...this.data.suggestedUsers,
-            ...pageData.content,
-          ];
+          this.data.suggestedUsers.push(...pageData.content);
         }
 
         this.moreDataAvailable.suggestedUsers = !pageData.last;

@@ -1,7 +1,3 @@
-// 📌 Đây là phiên bản đã refactor theo best practice
-// ❌ Các phần bị vi phạm phân tách trách nhiệm (UI logic: isOpen, isEditMode, currentPost)
-//    → Đã được loại bỏ và nên đưa vào composable usePostModal()
-
 import { defineStore } from "pinia";
 import blogService from "@/services/blogService";
 import { add, trim } from "lodash";
@@ -13,7 +9,7 @@ export const useBlogStore = defineStore("blog", {
     hiddenPosts: [],
     error: null,
     currentPage: 0,
-    pageSize: 3,
+    pageSize: 10,
     sortBy: "createdAt,desc",
     hasMorePosts: true,
     searchQuery: "",
@@ -26,7 +22,7 @@ export const useBlogStore = defineStore("blog", {
       this.hiddenPosts = [];
       this.error = null;
       this.currentPage = 0;
-      this.pageSize = 3;
+      this.pageSize = 10;
       this.sortBy = "createdAt,desc";
       this.hasMorePosts = true;
       this.searchQuery = "";
@@ -80,7 +76,7 @@ export const useBlogStore = defineStore("blog", {
 
         if (append && page > 0) {
           // Append new posts to existing ones for infinite scroll
-          this.publicPosts = [...this.publicPosts, ...pageData.content];
+          this.publicPosts.push(...pageData.content);
         } else {
           // Replace posts (initial load or refresh)
           this.publicPosts = pageData.content;
