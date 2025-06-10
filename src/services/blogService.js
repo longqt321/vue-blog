@@ -1,13 +1,12 @@
 import api from "./api";
 
 export default {
-  async getPosts(filter = {}, page = 0, size = 10, sortBy = "createdAt,desc") {
+  async getPosts(filter = {}, page = 0, size = 10) {
     try {
       const params = {
         ...filter,
         page,
         size,
-        sortBy,
       };
       const response = await api.get("/blogs", {
         params,
