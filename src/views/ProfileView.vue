@@ -406,7 +406,5 @@ onMounted(async () => {
 });
 
 // Clean up when leaving the profile page
-onBeforeUnmount(() => {
-  // No explicit cleanup needed as we're using dedicated stores
-});
+onBeforeUnmount(() => {});
 </script>

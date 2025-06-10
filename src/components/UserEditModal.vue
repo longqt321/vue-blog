@@ -4,7 +4,7 @@
       <!-- Avatar section -->
       <div class="flex flex-col items-center mb-8">
         <DynamicImage
-          :imageId="editForm.avatarId || defaultAvatar"
+          :imageId="editForm.avatarId"
           alt="Ảnh đại diện"
           container-class="w-32 h-32 rounded-full border-2 border-gray-200 mb-4 shadow-sm overflow-hidden"
           image-class="w-full h-full object-cover"
@@ -127,16 +127,15 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useModalStore } from "@/stores/modalStore";
-import { useUserStore } from "@/stores/userStore";
 import userService from "@/services/userService";
 import imageService from "@/services/imageService";
 import DynamicImage from "./DynamicImage.vue";
+import { useUserStore } from "@/stores/userStore";
 
 const authStore = useAuthStore();
 const modalStore = useModalStore();
+const userStore = useUserStore();
 const isOpen = computed(() => modalStore.isUserEditOpen);
-
-const defaultAvatar = "/assets/avatar.jpg";
 
 // Loading states
 const uploadingAvatar = ref(false);
@@ -174,22 +173,10 @@ const handleAvatarUpload = async (file) => {
   try {
     uploadingAvatar.value = true;
 
-    // VaFileUpload có thể trả về file trực tiếp hoặc wrapped object
-
-    // Kiểm tra nếu file là wrapper object
     const actualFile = file[0];
 
-    // Gọi API upload ảnh
     const imageId = await imageService.uploadAvatar(actualFile);
-
-    // Cập nhật avatarId trong form
     editForm.value.avatarId = imageId;
-
-    console.log("Avatar uploaded successfully:", imageId);
-
-    // Hiển thị thông báo thành công
-    // TODO: Thay thế bằng notification component
-    alert("Tải ảnh lên thành công!");
   } catch (error) {
     console.error("Error uploading avatar:", error);
   } finally {
@@ -216,12 +203,11 @@ const submitEditProfile = async () => {
       updatedUser.avatarId = editForm.value.avatarId;
     }
 
-    console.log("Dữ liệu gửi đi:", updatedUser);
-
     // Gọi API cập nhật user
-    await userService.updateUser(updatedUser.id, updatedUser);
-
+    const response = await userService.updateUser(updatedUser.id, updatedUser);
+    authStore.setUser(response.data);
     closeModal();
+    location.reload(); // Tải lại trang để cập nhật thông tin người dùng
   } catch (error) {
     console.error("Error updating profile:", error);
   } finally {

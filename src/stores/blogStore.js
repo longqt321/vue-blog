@@ -35,7 +35,7 @@ export const useBlogStore = defineStore("blog", {
         author: "",
       };
       const addToFilter = (token) => {
-        const trimmed = trim(token);
+        const trimmed = token.trim();
         if (!trimmed) return;
         if (trimmed.startsWith("#")) {
           filter.hashtags.push(trimmed.substring(1));

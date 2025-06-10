@@ -1,12 +1,13 @@
 <script setup>
 import Friend from "./Friend.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { debounce } from "lodash";
 import { useUserStore } from "@/stores/userStore";
 import userService from "@/services/userService";
 import SearchBar from "./SearchBar.vue";
 
 const userStore = useUserStore();
-const userSearch = ref("");
+const searchQuery = ref("");
 const isLoading = computed(() => userStore.isSuggestedUsersLoading);
 
 const suggestedUsers = computed(() => userStore.getSuggestedUsers);
@@ -22,6 +23,19 @@ const loadMoreSuggestedUser = async () => {
   await userStore.loadMoreSuggestedUsers();
 };
 
+const performSearch = async (query) => {
+  console.log("Searching for:", query);
+  userStore.data.searchQuery = searchQuery.value;
+  console.log("Search query set to:", userStore.data.searchQuery);
+  await userStore.fetchSuggestedUsers();
+};
+
+const debouncedSearch = debounce(performSearch, 500);
+
+watch(searchQuery, (newVal) => {
+  debouncedSearch(newVal);
+});
+
 onMounted(async () => {
   if (!suggestedUsers.value.length) {
     await userStore.fetchSuggestedUsers(0);
@@ -35,12 +49,37 @@ onMounted(async () => {
   >
     <!-- Header Section -->
     <div class="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-      <h2 class="text-lg font-bold">Những người dùng khác</h2>
+      <h2 class="text-lg font-bold">
+        Những người dùng khác
+        <span class="relative group">
+          <va-icon
+            name="help_outline"
+            size="small"
+            class="ml-1 cursor-pointer"
+          />
+          <div
+            class="absolute z-10 left-1/2 -translate-x-1/2 mt-2 w-72 bg-white text-blue-900 text-sm rounded shadow-lg p-3 border border-blue-200 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200"
+          >
+            <div class="font-semibold mb-1">Hướng dẫn tìm kiếm:</div>
+            <ul class="list-disc pl-5">
+              <li>
+                <b>@username</b> — Tìm theo tên đăng nhập. Ví dụ:
+                <b>@longtran123</b>
+              </li>
+              <li>
+                <b>Họ tên</b> — Tìm theo họ tên. Ví dụ: <b>Trần Đức Long</b>
+              </li>
+              <li>Lưu ý: Chỉ chấp nhận 1 tiêu chí đồng thời</li>
+              <li>Ví dụ: <b>@longtran123 hoặc Tran Duc Long</b></li>
+            </ul>
+          </div>
+        </span>
+      </h2>
     </div>
     <!-- Search Friends Section -->
     <div class="p-4 border-b border-blue-50">
       <SearchBar
-        v-model="userSearch"
+        v-model="searchQuery"
         placeholder="Tìm kiếm người dùng theo tên hoặc tên đăng nhập..."
       />
     </div>

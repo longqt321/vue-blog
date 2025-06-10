@@ -8,7 +8,6 @@ import hashtagService from "@/services/hashtagService";
 // Stores
 const blogStore = useBlogStore();
 
-// Popular tags that could be derived from actual data in a real app
 const popularTags = ref([]);
 const searchQuery = ref("");
 

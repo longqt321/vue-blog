@@ -1,9 +1,10 @@
 import api from "./api";
 
 export default {
-  async getUsers(page = 0, size = 3) {
+  async getUsers(filter = {}, page = 0, size = 10) {
     try {
       const params = {
+        ...filter,
         page,
         size,
       };

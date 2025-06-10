@@ -21,6 +21,7 @@ export const useUserStore = defineStore("user", {
       savedBlogs: [],
       hiddenBlogs: [],
       suggestedUsers: [],
+      searchQuery: "",
     },
     currentPage: {
       suggestedUsers: 0,
@@ -60,6 +61,7 @@ export const useUserStore = defineStore("user", {
       this.data.personalBlogs = [];
       this.data.savedBlogs = [];
       this.data.suggestedUsers = [];
+      this.data.searchQuery = "";
       this.currentPage.suggestedUsers = 0;
       this.moreDataAvailable.suggestedUsers = false;
       this.loading = {
@@ -74,6 +76,29 @@ export const useUserStore = defineStore("user", {
         personalBlogs: null,
         savedBlogs: null,
       };
+    },
+    parseSearchQuery() {
+      const filter = {
+        username: "",
+        fullName: "",
+      };
+      const addToFilter = (token) => {
+        const trimmed = token.trim();
+        if (!trimmed) return;
+        if (trimmed.startsWith("@")) {
+          filter.username = trimmed.substring(1);
+        } else {
+          filter.fullName = trimmed;
+        }
+      };
+      console.log("SEARCH QUERY", this.data.searchQuery);
+      if (!this.data.searchQuery) return filter;
+      const tokens = this.data.searchQuery.split(",");
+      for (const token of tokens) {
+        addToFilter(token);
+      }
+      console.log("FILTER", filter);
+      return filter;
     },
     async fetchProfile(id) {
       this.loading.profile = true;
@@ -103,6 +128,21 @@ export const useUserStore = defineStore("user", {
       } finally {
         this.loading.profile = false;
       }
+    },
+    setProfile(profile) {
+      this.profile = {
+        id: profile.id,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        fullName: `${profile.lastName} ${profile.firstName}`,
+        username: profile.username,
+        avatar: profile.avatarId,
+        description: profile.description || "",
+        createdAt: profile.createdAt,
+        followersCount: profile.followersCount || 0,
+        followingCount: profile.followingCount || 0,
+        postCount: profile.postCount || 0,
+      };
     },
 
     async fetchPersonalBlogs() {
@@ -183,7 +223,11 @@ export const useUserStore = defineStore("user", {
       this.loading.suggestedUsers = true;
       this.error.suggestedUsers = null;
       try {
-        const response = await userService.getUsers(page);
+        const filter = {
+          ...this.parseSearchQuery(),
+        };
+        console.log("FILTER", filter);
+        const response = await userService.getUsers(filter, page);
         if (!response.success) {
           this.error.suggestedUsers =
             response.message || "Failed to load suggested users";
