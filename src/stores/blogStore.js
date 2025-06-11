@@ -10,7 +10,7 @@ export const useBlogStore = defineStore("blog", {
     error: null,
     currentPage: 0,
     pageSize: 10,
-    sortBy: "createdAt,desc",
+    sortBy: "score,desc",
     hasMorePosts: true,
     searchQuery: "",
   }),
@@ -23,7 +23,7 @@ export const useBlogStore = defineStore("blog", {
       this.error = null;
       this.currentPage = 0;
       this.pageSize = 10;
-      this.sortBy = "createdAt,desc";
+      this.sortBy = "score,desc";
       this.hasMorePosts = true;
       this.searchQuery = "";
     },
@@ -64,8 +64,7 @@ export const useBlogStore = defineStore("blog", {
         const response = await blogService.getPosts(
           filter,
           page,
-          this.pageSize,
-          this.sortBy
+          this.pageSize
         );
 
         if (response.success === false) {
@@ -147,7 +146,6 @@ export const useBlogStore = defineStore("blog", {
         throw error;
       }
     },
-
     async unlikePost(postId) {
       this.error = null;
       try {
@@ -157,6 +155,13 @@ export const useBlogStore = defineStore("blog", {
       } catch (error) {
         this.error = "Failed to unlike post. Please try again.";
         throw error;
+      }
+    },
+
+    syncChanges(postId, postData) {
+      const index = this.publicPosts.findIndex((post) => post.id === postId);
+      if (index !== -1) {
+        this.publicPosts[index] = postData;
       }
     },
   },

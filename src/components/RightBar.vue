@@ -27,7 +27,7 @@ const performSearch = async (query) => {
   console.log("Searching for:", query);
   userStore.data.searchQuery = searchQuery.value;
   console.log("Search query set to:", userStore.data.searchQuery);
-  await userStore.fetchSuggestedUsers();
+  await userStore.fetchSuggestedUsers(0);
 };
 
 const debouncedSearch = debounce(performSearch, 500);
@@ -83,14 +83,17 @@ onMounted(async () => {
         placeholder="Tìm kiếm người dùng theo tên hoặc tên đăng nhập..."
       />
     </div>
-
     <!-- Online Friends Section -->
     <div class="p-4 border-b border-blue-50">
-      <div class="max-h-64 overflow-y-auto scrollbar-custom space-y-2">
+      <div
+        id="rightbar-scroll"
+        class="max-h-64 overflow-y-auto scrollbar-custom space-y-2"
+      >
         <!-- Loading State -->
         <VaInfiniteScroll
           :load="loadMoreSuggestedUser"
           :disabled="isLoading || !moreSuggestedUsersAvailable"
+          scroll-target="#rightbar-scroll"
           :offset="100"
           :debounce="250"
         >

@@ -25,9 +25,15 @@ export const useUserStore = defineStore("user", {
     },
     currentPage: {
       suggestedUsers: 0,
+      personalBlogs: 0,
+      savedBlogs: 0,
+      hiddenBlogs: 0,
     },
     moreDataAvailable: {
       suggestedUsers: false,
+      personalBlogs: false,
+      savedBlogs: false,
+      hiddenBlogs: false,
     },
     loading: {
       personalBlogs: false,
@@ -60,10 +66,17 @@ export const useUserStore = defineStore("user", {
       };
       this.data.personalBlogs = [];
       this.data.savedBlogs = [];
+      this.data.hiddenBlogs = [];
       this.data.suggestedUsers = [];
       this.data.searchQuery = "";
       this.currentPage.suggestedUsers = 0;
+      this.currentPage.personalBlogs = 0;
+      this.currentPage.savedBlogs = 0;
+      this.currentPage.hiddenBlogs = 0;
       this.moreDataAvailable.suggestedUsers = false;
+      this.moreDataAvailable.personalBlogs = false;
+      this.moreDataAvailable.savedBlogs = false;
+      this.moreDataAvailable.hiddenBlogs = false;
       this.loading = {
         loading: false,
         personalBlogs: false,
@@ -107,7 +120,7 @@ export const useUserStore = defineStore("user", {
       try {
         const data = await userService.getUserById(id);
 
-        console.log(data);
+        //console.log(data);
         this.profile = {
           id: data.id,
           firstName: data.firstName,
@@ -121,7 +134,7 @@ export const useUserStore = defineStore("user", {
           followingCount: data.followingCount || 0,
           postCount: data.postCount || 0,
         };
-        console.log("PROFILE DATA", this.profile.avatar);
+        //console.log("PROFILE DATA", this.profile.avatar);
       } catch (error) {
         console.error("ERROR FETCHING PROFILE", error);
         this.error.profile = "Failed to load profile.";
@@ -144,8 +157,7 @@ export const useUserStore = defineStore("user", {
         postCount: profile.postCount || 0,
       };
     },
-
-    async fetchPersonalBlogs() {
+    async fetchPersonalBlogs(page = 0, append = false) {
       this.loading.personalBlogs = true;
       this.error.personalBlogs = null;
       const authStore = useAuthStore();
@@ -153,14 +165,20 @@ export const useUserStore = defineStore("user", {
       try {
         let response = {};
         if (authStore.user.id !== this.profile.id) {
-          response = await blogService.getPosts({
-            authorId: this.profile.id,
-            visibility: "PUBLIC",
-          });
+          response = await blogService.getPosts(
+            {
+              authorId: this.profile.id,
+              visibility: "PUBLIC",
+            },
+            page
+          );
         } else {
-          response = await blogService.getPosts({
-            authorId: this.profile.id,
-          });
+          response = await blogService.getPosts(
+            {
+              authorId: this.profile.id,
+            },
+            page
+          );
         }
 
         if (!response.success) {
@@ -169,50 +187,110 @@ export const useUserStore = defineStore("user", {
           return;
         }
 
-        this.data.personalBlogs = response.data.content;
+        const pageData = response.data;
+
+        // If page is 0 or append is false, replace the array, otherwise append the new content
+        if (page === 0 || !append) {
+          this.data.personalBlogs = pageData.content;
+        } else {
+          this.data.personalBlogs.push(...pageData.content);
+        }
+
+        this.moreDataAvailable.personalBlogs = !pageData.last;
+        this.currentPage.personalBlogs = page;
+
+        console.log("PersonalBlogs pagination:", {
+          page,
+          append,
+          contentLength: pageData.content.length,
+          totalBlogs: this.data.personalBlogs.length,
+          hasMore: this.moreDataAvailable.personalBlogs,
+        });
       } catch (error) {
         console.error("ERROR FETCHING PERSONAL BLOGS", error);
-        this.personalBlogsError = "Failed to load personal blogs.";
+        this.error.personalBlogs = "Failed to load personal blogs.";
         throw error;
       } finally {
         this.loading.personalBlogs = false;
       }
     },
-    async fetchSavedBlogs() {
+    async fetchSavedBlogs(page = 0, append = false) {
       this.loading.savedBlogs = true;
       this.error.savedBlogs = null;
       try {
-        const response = await blogService.getPosts({
-          userId: this.profile.id,
-          relationshipType: "SAVED",
-        });
+        const response = await blogService.getPosts(
+          {
+            userId: this.profile.id,
+            relationshipType: "SAVED",
+          },
+          page
+        );
         if (!response.success) {
           this.error.savedBlogs = response.message || "Failed to load blogs.";
           return;
         }
 
-        this.data.savedBlogs = response.data.content;
+        const pageData = response.data;
+
+        // If page is 0 or append is false, replace the array, otherwise append the new content
+        if (page === 0 || !append) {
+          this.data.savedBlogs = pageData.content;
+        } else {
+          this.data.savedBlogs.push(...pageData.content);
+        }
+
+        this.moreDataAvailable.savedBlogs = !pageData.last;
+        this.currentPage.savedBlogs = page;
+
+        console.log("SavedBlogs pagination:", {
+          page,
+          append,
+          contentLength: pageData.content.length,
+          totalBlogs: this.data.savedBlogs.length,
+          hasMore: this.moreDataAvailable.savedBlogs,
+        });
       } catch (error) {
         console.error(error);
       } finally {
         this.loading.savedBlogs = false;
       }
     },
-    async fetchHiddenBlogs() {
+    async fetchHiddenBlogs(page = 0, append = false) {
       this.loading.hiddenBlogs = true;
       this.error.hiddenBlogs = null;
       try {
-        const response = await blogService.getPosts({
-          userId: this.profile.id,
-          relationshipType: "HIDDEN",
-        });
+        const response = await blogService.getPosts(
+          {
+            userId: this.profile.id,
+            relationshipType: "HIDDEN",
+          },
+          page
+        );
         if (!response.success) {
           this.error.hiddenBlogs =
             response.message || "Failed to load hidden blogs.";
           return;
         }
 
-        this.data.hiddenBlogs = response.data.content;
+        const pageData = response.data;
+
+        // If page is 0 or append is false, replace the array, otherwise append the new content
+        if (page === 0 || !append) {
+          this.data.hiddenBlogs = pageData.content;
+        } else {
+          this.data.hiddenBlogs.push(...pageData.content);
+        }
+
+        this.moreDataAvailable.hiddenBlogs = !pageData.last;
+        this.currentPage.hiddenBlogs = page;
+
+        console.log("HiddenBlogs pagination:", {
+          page,
+          append,
+          contentLength: pageData.content.length,
+          totalBlogs: this.data.hiddenBlogs.length,
+          hasMore: this.moreDataAvailable.hiddenBlogs,
+        });
       } catch (error) {
         console.error(error);
       } finally {
@@ -241,7 +319,7 @@ export const useUserStore = defineStore("user", {
         } else {
           this.data.suggestedUsers.push(...pageData.content);
         }
-
+        console.log(pageData.last);
         this.moreDataAvailable.suggestedUsers = !pageData.last;
         this.currentPage.suggestedUsers = page;
       } catch (error) {
@@ -260,6 +338,30 @@ export const useUserStore = defineStore("user", {
       }
       return await this.fetchSuggestedUsers(
         this.currentPage.suggestedUsers + 1
+      );
+    },
+    async loadMorePersonalBlogs() {
+      if (!this.moreDataAvailable.personalBlogs || this.loading.personalBlogs) {
+        return Promise.resolve();
+      }
+      return await this.fetchPersonalBlogs(
+        this.currentPage.personalBlogs + 1,
+        true
+      );
+    },
+    async loadMoreSavedBlogs() {
+      if (!this.moreDataAvailable.savedBlogs || this.loading.savedBlogs) {
+        return Promise.resolve();
+      }
+      return await this.fetchSavedBlogs(this.currentPage.savedBlogs + 1, true);
+    },
+    async loadMoreHiddenBlogs() {
+      if (!this.moreDataAvailable.hiddenBlogs || this.loading.hiddenBlogs) {
+        return Promise.resolve();
+      }
+      return await this.fetchHiddenBlogs(
+        this.currentPage.hiddenBlogs + 1,
+        true
       );
     },
     removePersonalPostById(postId) {
@@ -282,11 +384,28 @@ export const useUserStore = defineStore("user", {
       );
     },
     syncChanges(postId, postData) {
+      // Update personal blogs
       const personalIndex = this.data.personalBlogs.findIndex(
         (post) => post.id === postId
       );
       if (personalIndex !== -1) {
         this.data.personalBlogs[personalIndex] = postData;
+      }
+
+      // Update saved blogs
+      const savedIndex = this.data.savedBlogs.findIndex(
+        (post) => post.id === postId
+      );
+      if (savedIndex !== -1) {
+        this.data.savedBlogs[savedIndex] = postData;
+      }
+
+      // Update hidden blogs
+      const hiddenIndex = this.data.hiddenBlogs.findIndex(
+        (post) => post.id === postId
+      );
+      if (hiddenIndex !== -1) {
+        this.data.hiddenBlogs[hiddenIndex] = postData;
       }
     },
   },
@@ -304,6 +423,10 @@ export const useUserStore = defineStore("user", {
     isHiddenBlogsLoading: (state) => state.loading.hiddenBlogs,
     moreSuggestedUsersAvailable: (state) =>
       state.moreDataAvailable.suggestedUsers,
+    morePersonalBlogsAvailable: (state) =>
+      state.moreDataAvailable.personalBlogs,
+    moreSavedBlogsAvailable: (state) => state.moreDataAvailable.savedBlogs,
+    moreHiddenBlogsAvailable: (state) => state.moreDataAvailable.hiddenBlogs,
     getProfileError: (state) => state.error.profile,
     getPersonalBlogsError: (state) => state.error.personalBlogs,
     getSavedBlogsError: (state) => state.error.savedBlogs,

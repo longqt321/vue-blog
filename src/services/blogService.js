@@ -61,7 +61,7 @@ export default {
 
   async unlikePost(postId) {
     try {
-      const response = await api.post(`/blogs/${postId}/unlike`);
+      const response = await api.delete(`/blogs/${postId}/like`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNLIKE POST!!", error);
@@ -84,7 +84,7 @@ export default {
   // Unsave a post
   async unsavePost(postId) {
     try {
-      const response = await api.post(`/blogs/${postId}/unsave`);
+      const response = await api.delete(`/blogs/${postId}/save`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNSAVE POST", error);
@@ -104,7 +104,7 @@ export default {
   // Unsave a post
   async unreportPost(postId) {
     try {
-      const response = await api.post(`/blogs/${postId}/unreport`);
+      const response = await api.delete(`/blogs/${postId}/report`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNREPORT POST", error);
@@ -123,7 +123,7 @@ export default {
   },
   async unhidePost(postId) {
     try {
-      const response = await api.post(`/blogs/${postId}/unhide`);
+      const response = await api.delete(`/blogs/${postId}/hide`);
       return response.data;
     } catch (error) {
       console.error("ERROR UNHIDE POST", error);

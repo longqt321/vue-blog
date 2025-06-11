@@ -153,7 +153,7 @@
           >
             <div class="flex">
               <button
-                v-for="tab in tabs"
+                v-for="tab in visibleTabs"
                 :key="tab.id"
                 @click="activeTab = tab.id"
                 class="flex-1 py-3 px-4 text-center font-medium transition-colors duration-200"
@@ -168,74 +168,115 @@
             </div>
           </div>
           <!-- Tab Content -->
-          <div v-if="activeTab === 'posts'" class="space-y-6">
-            <div v-if="isLoading" class="flex justify-center py-12">
-              <va-progress-circle indeterminate color="primary" />
+          <VaInfiniteScroll
+            :load="loadMore"
+            :disabled="!hasMore"
+            scroll-target="#app-container"
+            :offset="200"
+            :debounce="500"
+            reverse
+          >
+            <div v-if="activeTab === 'posts'" class="space-y-6">
+              <div v-if="isLoading" class="flex justify-center py-12">
+                <va-progress-circle indeterminate color="primary" />
+              </div>
+
+              <div
+                v-else-if="hasNoPosts"
+                class="bg-white rounded-xl shadow-md p-8 text-center"
+              >
+                <h3 class="mt-4 text-xl font-medium text-gray-800">
+                  Chưa có bài viết nào
+                </h3>
+                <p class="mt-2 text-gray-500">
+                  {{
+                    isCurrentUser
+                      ? "Hãy chia sẻ bài viết đầu tiên của bạn với cộng đồng!"
+                      : "Người dùng này chưa chia sẻ bài viết nào."
+                  }}
+                </p>
+              </div>
+
+              <BlogPost v-for="post in userPosts" :key="post.id" :post="post" />
+
+              <!-- Debug info -->
+              <div
+                v-if="userPosts.length > 0"
+                class="text-xs text-gray-400 text-center py-2"
+              >
+                Posts: {{ userPosts.length }} | Has More: {{ hasMore }}
+              </div>
+            </div>
+            <div v-if="activeTab === 'saved'" class="space-y-6">
+              <div v-if="isLoading" class="flex justify-center py-12">
+                <va-progress-circle indeterminate color="primary" />
+              </div>
+
+              <div
+                v-else-if="hasNoPosts"
+                class="bg-white rounded-xl shadow-md p-8 text-center"
+              >
+                <h3 class="mt-4 text-xl font-medium text-gray-800">
+                  Chưa có bài viết đã lưu
+                </h3>
+                <p class="mt-2 text-gray-500">
+                  {{
+                    isCurrentUser
+                      ? "Lưu bài viết để đọc sau"
+                      : "Người dùng này chưa lưu bài viết nào."
+                  }}
+                </p>
+              </div>
+              <BlogPost
+                v-for="post in savedPosts"
+                :key="post.id"
+                :post="post"
+              />
+
+              <!-- Debug info -->
+              <div
+                v-if="savedPosts.length > 0"
+                class="text-xs text-gray-400 text-center py-2"
+              >
+                Saved: {{ savedPosts.length }} | Has More: {{ hasMore }}
+              </div>
             </div>
 
-            <div
-              v-else-if="hasNoPosts"
-              class="bg-white rounded-xl shadow-md p-8 text-center"
-            >
-              <h3 class="mt-4 text-xl font-medium text-gray-800">
-                Chưa có bài viết nào
-              </h3>
-              <p class="mt-2 text-gray-500">
-                {{
-                  isCurrentUser
-                    ? "Hãy chia sẻ bài viết đầu tiên của bạn với cộng đồng!"
-                    : "Người dùng này chưa chia sẻ bài viết nào."
-                }}
-              </p>
-            </div>
+            <div v-if="activeTab === 'hidden'" class="space-y-6">
+              <div v-if="isLoading" class="flex justify-center py-12">
+                <va-progress-circle indeterminate color="primary" />
+              </div>
 
-            <BlogPost v-for="post in userPosts" :key="post.id" :post="post" />
-          </div>
+              <div
+                v-else-if="hasNoPosts"
+                class="bg-white rounded-xl shadow-md p-8 text-center"
+              >
+                <h3 class="mt-4 text-xl font-medium text-gray-800">
+                  Chưa có bài viết ẩn
+                </h3>
+                <p class="mt-2 text-gray-500">
+                  {{
+                    isCurrentUser
+                      ? "Bài viết ẩn sẽ xuất hiện ở đây"
+                      : "Người dùng này chưa ẩn bài viết nào."
+                  }}
+                </p>
+              </div>
+              <BlogPost
+                v-for="post in hiddenPosts"
+                :key="post.id"
+                :post="post"
+              />
 
-          <div v-if="activeTab === 'saved'" class="space-y-6">
-            <div v-if="isLoading" class="flex justify-center py-12">
-              <va-progress-circle indeterminate color="primary" />
+              <!-- Debug info -->
+              <div
+                v-if="hiddenPosts.length > 0"
+                class="text-xs text-gray-400 text-center py-2"
+              >
+                Hidden: {{ hiddenPosts.length }} | Has More: {{ hasMore }}
+              </div>
             </div>
-
-            <div
-              v-else-if="hasNoPosts"
-              class="bg-white rounded-xl shadow-md p-8 text-center"
-            >
-              <h3 class="mt-4 text-xl font-medium text-gray-800">
-                Chưa có bài viết đã lưu
-              </h3>
-              <p class="mt-2 text-gray-500">
-                {{
-                  isCurrentUser
-                    ? "Lưu bài viết để đọc sau"
-                    : "Người dùng này chưa lưu bài viết nào."
-                }}
-              </p>
-            </div>
-            <BlogPost v-for="post in savedPosts" :key="post.id" :post="post" />
-          </div>
-          <div v-if="activeTab === 'hidden'" class="space-y-6">
-            <div v-if="isLoading" class="flex justify-center py-12">
-              <va-progress-circle indeterminate color="primary" />
-            </div>
-
-            <div
-              v-else-if="hasNoPosts"
-              class="bg-white rounded-xl shadow-md p-8 text-center"
-            >
-              <h3 class="mt-4 text-xl font-medium text-gray-800">
-                Chưa có bài viết ẩn
-              </h3>
-              <p class="mt-2 text-gray-500">
-                {{
-                  isCurrentUser
-                    ? "Bài viết ẩn sẽ xuất hiện ở đây"
-                    : "Người dùng này chưa ẩn bài viết nào."
-                }}
-              </p>
-            </div>
-            <BlogPost v-for="post in hiddenPosts" :key="post.id" :post="post" />
-          </div>
+          </VaInfiniteScroll>
         </div>
       </div>
     </div>
@@ -278,15 +319,55 @@ const profileUser = computed(() => userStore.getProfile);
 const tabs = ref([
   { id: "posts", name: "Cá nhân" },
   { id: "saved", name: "Đã lưu" },
-  { id: "hidden", name: "Đã ẩn" },
+  //{ id: "hidden", name: "Đã ẩn" },
 ]);
 
 // Computed properties
-const isLoading = computed(() =>
-  activeTab.value === "posts"
-    ? userStore.isPersonalBlogsLoading
-    : userStore.isSavedBlogsLoading
-);
+const isLoading = computed(() => {
+  if (activeTab.value === "posts") {
+    return userStore.isPersonalBlogsLoading;
+  } else if (activeTab.value === "saved") {
+    return userStore.isSavedBlogsLoading;
+  } else if (activeTab.value === "hidden") {
+    return userStore.isHiddenBlogsLoading;
+  }
+  return false;
+});
+const userPosts = computed(() => userStore.getPersonalBlogs);
+const savedPosts = computed(() => userStore.getSavedBlogs);
+const hiddenPosts = computed(() => userStore.getHiddenBlogs);
+const hasMore = computed(() => {
+  if (activeTab.value === "posts") {
+    return userStore.morePersonalBlogsAvailable;
+  } else if (activeTab.value === "saved") {
+    return userStore.moreSavedBlogsAvailable;
+  } else if (activeTab.value === "hidden") {
+    return userStore.moreHiddenBlogsAvailable;
+  }
+  return false;
+});
+
+const loadMore = async () => {
+  console.log("ProfileView loadMore called for tab:", activeTab.value);
+
+  if (activeTab.value === "posts") {
+    if (hasMore.value && !isLoading.value) {
+      console.log("Loading more personal blogs...");
+      await userStore.loadMorePersonalBlogs();
+    }
+  } else if (activeTab.value === "saved") {
+    if (hasMore.value && !isLoading.value) {
+      console.log("Loading more saved blogs...");
+      await userStore.loadMoreSavedBlogs();
+    }
+  } else if (activeTab.value === "hidden") {
+    if (hasMore.value && !isLoading.value) {
+      console.log("Loading more hidden blogs...");
+      await userStore.loadMoreHiddenBlogs();
+    }
+  }
+};
+
 const error = computed(() => {
   if (activeTab.value === "posts") {
     return userStore.getPersonalBlogsError;
@@ -296,9 +377,7 @@ const error = computed(() => {
     return userStore.getHiddenBlogsError;
   }
 });
-const userPosts = computed(() => userStore.getPersonalBlogs);
-const savedPosts = computed(() => userStore.getSavedBlogs);
-const hiddenPosts = computed(() => userStore.getHiddenBlogs);
+
 const currentUser = computed(() => authStore.getUser);
 const profileUserId = computed(() => profileUser.value?.id);
 const hasNoPosts = computed(() => {
@@ -316,6 +395,14 @@ const isCurrentUser = computed(() => {
     profileUserId.value &&
     currentUser.value.id === profileUserId.value
   );
+});
+
+const visibleTabs = computed(() => {
+  if (isCurrentUser.value) {
+    return tabs.value; // Show all tabs for current user
+  } else {
+    return tabs.value.filter((tab) => tab.id !== "hidden"); // Hide hidden tab for other users
+  }
 });
 
 const toggleRelationship = async (type) => {
@@ -347,6 +434,8 @@ const toggleRelationship = async (type) => {
         userRelationship.value = UserRelationship.BLOCKING;
       }
     }
+    await fetchRelationshipStatus();
+    await fetchProfileUser();
   } catch (error) {
     console.error("toggleRelationship failed:", error);
   }
@@ -373,7 +462,11 @@ const fetchRelationshipStatus = async () => {
 const handleTabChange = async (tabId) => {
   activeTab.value = tabId;
   console.log("Active tab changed to:", tabId);
-  if (tabId === "saved" && savedPosts.value.length === 0) {
+
+  // Reset pagination when switching tabs
+  if (tabId === "posts" && userPosts.value.length === 0) {
+    await userStore.fetchPersonalBlogs();
+  } else if (tabId === "saved" && savedPosts.value.length === 0) {
     await userStore.fetchSavedBlogs();
   } else if (
     tabId === "hidden" &&
@@ -381,8 +474,6 @@ const handleTabChange = async (tabId) => {
     hiddenPosts.value.length === 0
   ) {
     await userStore.fetchHiddenBlogs();
-  } else if (tabId === "posts" && userPosts.value.length === 0) {
-    await userStore.fetchPersonalBlogs();
   }
 };
 

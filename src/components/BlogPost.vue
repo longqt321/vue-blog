@@ -201,12 +201,14 @@ const goToProfile = () => {
 
 const handleLikePost = async () => {
   try {
+    console.log("Toggling like status for post:", props.post.id);
     if (isLiked.value) {
-      await blogStore.unlikePost(props.post.id);
+      await blogService.unlikePost(props.post.id);
     } else {
-      await blogStore.likePost(props.post.id);
+      await blogService.likePost(props.post.id);
     }
     await refreshPost();
+    await syncWithStores();
   } catch (error) {
     console.error("Failed to toggle like status", error);
     // Could show a toast notification here
@@ -235,12 +237,12 @@ const handleHidePost = async (postId) => {
   try {
     if (isHidden.value) {
       await blogService.unhidePost(postId);
-      userStore.removeHiddenPostById(postId);
     } else {
       await blogService.hidePost(postId);
       blogStore.removePostById(postId);
     }
     await refreshPost();
+    await syncWithStores();
   } catch (error) {
     console.error("Failed to hide post", error);
   }
@@ -250,12 +252,14 @@ const handleSavePost = async (postId) => {
   try {
     if (isSaved.value) {
       await blogService.unsavePost(postId);
-      userStore.removeSavedPostById(postId);
     } else {
       await blogService.savePost(postId);
     }
     showOptionsDropdown.value = false;
     await refreshPost();
+
+    // Sync changes to all stores that might have this post
+    await syncWithStores();
   } catch (error) {
     console.error(error);
   }
@@ -287,6 +291,35 @@ async function refreshPost() {
       isBlockingOwner.value = false;
       isFollowingOwner.value = false;
     }
+  }
+}
+
+// Sync with stores after interaction
+async function syncWithStores() {
+  try {
+    // Get updated post data from API
+    const response = await blogService.getPosts({ id: props.post.id });
+    const updatedPost = response.data?.content?.[0] || response.data;
+
+    if (updatedPost) {
+      // Sync with userStore
+      userStore.syncChanges(props.post.id, updatedPost);
+
+      // Sync with blogStore
+      blogStore.syncChanges(props.post.id, updatedPost);
+
+      // If post was unsaved, remove it from savedBlogs array
+      if (!updatedPost.relationship?.saved) {
+        userStore.removeSavedPostById(props.post.id);
+      }
+
+      // If post was unhidden, remove it from hiddenBlogs array
+      if (!updatedPost.relationship?.hidden) {
+        userStore.removeHiddenPostById(props.post.id);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to sync with stores", error);
   }
 }
 

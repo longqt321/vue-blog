@@ -20,7 +20,7 @@
         <!-- Right side: User controls -->
         <div class="flex items-center space-x-4">
           <!-- Notification Bell -->
-          <div class="relative">
+          <!-- <div class="relative">
             <button
               @click="toggleNotifDropdown"
               class="p-2.5 rounded-full hover:bg-blue-600 transition duration-200"
@@ -40,11 +40,10 @@
               </div>
             </button>
 
-            <!-- Notification Dropdown -->
             <BaseDropdown v-if="showNotifDropdown">
               <NotificationContent />
             </BaseDropdown>
-          </div>
+          </div> -->
 
           <!-- User Avatar -->
           <div class="relative">
